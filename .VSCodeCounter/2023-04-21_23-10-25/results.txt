@@ -1,0 +1,54 @@
+Date : 2023-04-21 23:10:25
+Directory : c:\codefield\satellite\sat\src
+Total : 22 files,  1257 codes, 84 comments, 141 blanks, all 1482 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| Vue        |         11 |        852 |         20 |         73 |        945 |
+| JavaScript |         11 |        405 |         64 |         68 |        537 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                  |         22 |      1,257 |         84 |        141 |      1,482 |
+| . (Files)                                                          |          2 |         39 |          0 |         13 |         52 |
+| api                                                                |          3 |        107 |         21 |         26 |        154 |
+| components                                                         |         10 |        838 |         20 |         67 |        925 |
+| modules                                                            |          3 |         37 |          2 |         12 |         51 |
+| router                                                             |          1 |         21 |          0 |          4 |         25 |
+| store                                                              |          1 |         38 |          4 |          7 |         49 |
+| utils                                                              |          2 |        177 |         37 |         12 |        226 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                           | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\codefield\satellite\sat\src\App.vue                             | Vue        |         14 |          0 |          6 |         20 |
+| c:\codefield\satellite\sat\src\api\assignment.js                   | JavaScript |         53 |          9 |         12 |         74 |
+| c:\codefield\satellite\sat\src\api\collection.js                   | JavaScript |         27 |          6 |          7 |         40 |
+| c:\codefield\satellite\sat\src\api\sat.js                          | JavaScript |         27 |          6 |          7 |         40 |
+| c:\codefield\satellite\sat\src\components\collection.vue           | Vue        |         12 |          0 |          4 |         16 |
+| c:\codefield\satellite\sat\src\components\content.vue              | Vue        |         35 |          0 |          5 |         40 |
+| c:\codefield\satellite\sat\src\components\home.vue                 | Vue        |         22 |          0 |          2 |         24 |
+| c:\codefield\satellite\sat\src\components\navMenu.vue              | Vue        |         46 |          0 |          7 |         53 |
+| c:\codefield\satellite\sat\src\components\orbitView.vue            | Vue        |        208 |          0 |         14 |        222 |
+| c:\codefield\satellite\sat\src\components\satelliteInfo copy.vue   | Vue        |        118 |          0 |          6 |        124 |
+| c:\codefield\satellite\sat\src\components\satelliteInfo.vue        | Vue        |        103 |         20 |          5 |        128 |
+| c:\codefield\satellite\sat\src\components\satelliteSelect-copy.vue | Vue        |        100 |          0 |          8 |        108 |
+| c:\codefield\satellite\sat\src\components\satelliteSelect.vue      | Vue        |         85 |          0 |          6 |         91 |
+| c:\codefield\satellite\sat\src\components\sidebar.vue              | Vue        |        109 |          0 |         10 |        119 |
+| c:\codefield\satellite\sat\src\main.js                             | JavaScript |         25 |          0 |          7 |         32 |
+| c:\codefield\satellite\sat\src\modules\CesiumController.js         | JavaScript |         17 |          1 |          3 |         21 |
+| c:\codefield\satellite\sat\src\modules\Satellite.js                | JavaScript |          7 |          0 |          3 |         10 |
+| c:\codefield\satellite\sat\src\modules\SatelliteManager.js         | JavaScript |         13 |          1 |          6 |         20 |
+| c:\codefield\satellite\sat\src\router\index.js                     | JavaScript |         21 |          0 |          4 |         25 |
+| c:\codefield\satellite\sat\src\store\index.js                      | JavaScript |         38 |          4 |          7 |         49 |
+| c:\codefield\satellite\sat\src\utils\request.js                    | JavaScript |         18 |         15 |          4 |         37 |
+| c:\codefield\satellite\sat\src\utils\tles2czml.js                  | JavaScript |        159 |         22 |          8 |        189 |
+| Total                                                              |            |      1,257 |         84 |        141 |      1,482 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
