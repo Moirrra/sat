@@ -5,7 +5,8 @@ import store from './store'
 import API from '@/api'
 
 import { Menu, Submenu, MenuItem, MenuItemGroup, Select, Option, 
-  Button, Table, TableColumn, Form, FormItem, Input } from 'element-ui'
+  Button, Table, TableColumn, Pagination, Form, FormItem, 
+  Input, MessageBox, Message } from 'element-ui'
 
 Vue.use(Menu)
 Vue.use(Submenu)
@@ -16,14 +17,22 @@ Vue.use(Option)
 Vue.use(Button)
 Vue.use(Table)
 Vue.use(TableColumn)
+Vue.use(Pagination)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Input)
+Vue.component(MessageBox.name, MessageBox)
+Vue.component(Message.name, Message)
+
+Vue.prototype.$msgbox = MessageBox
+Vue.prototype.$alert = MessageBox.alert
+Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$prompt = MessageBox.prompt
+Vue.prototype.$message = Message
 
 Vue.config.productionTip = false
 
 Vue.prototype.$API = API
-
 
 new Vue({
   render: h => h(App),

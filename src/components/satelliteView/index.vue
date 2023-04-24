@@ -1,9 +1,13 @@
 <template>
   <div id="satellite-wrap">
+    <div class="search">
+      <el-input class="search-input" v-model="search" size="mini" placeholder="输入norad_id搜索" />
+      <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
+    </div>
     <div class="satellite-table">
-      <el-table :data="satelliteList" 
-      border stripe max-height="480" style="width: 95%"
-      ref="satTable"
+      <el-table :data="showData" 
+      border stripe min-height="480" style="width: 95%"
+      ref="satTable" 
       >
         <el-table-column fixed type="index">
         </el-table-column>
@@ -23,7 +27,16 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="btn-create" @click="createSat">
+    <div class="pagination">
+      <el-pagination
+        :page-size="pageSize"
+        :pager-count="11"
+        layout="total, prev, pager, next, jumper"
+        :total="filterData.length"
+        @current-change="handleCurrentChange">
+      </el-pagination>
+    </div>
+    <div class="btn-create" @click="handleCreate">
       <el-button type="primary">创建Satellite</el-button>
     </div>
   </div>
@@ -35,23 +48,29 @@ export default {
   name: 'SatelliteView',
   data() {
     return {
-      tableData: [],
+      filterData: [],
       currentPage: 1,
-      pageSize: 20,
-      totalPage: 0
+      pageSize: 5,
+      search: ''
     }
   },
   computed: {
     ...mapState({
       satelliteList: state => state.satList,
     }),
+    // 表格展示的分页数据
+    showData() {
+      return this.filterData.slice(
+        (this.currentPage-1) * this.pageSize,
+        this.currentPage * this.pageSize)
+    }
   },
   methods: {
     getData() {
       this.$store.dispatch('getAllSats')
-      this.totalPage = this.satelliteList.length / this.pageSize
-      let nextData = this.satelliteList.splice((this.currentPage-1) * this.pageSize, this.pageSize)
-      this.tableData = this.tableData.concat(nextData)
+      this.totalPage = Math.floor(this.satelliteList.length / this.pageSize) + 1
+      // let nextData = this.satelliteList.splice((this.currentPage-1) * this.pageSize, this.pageSize)
+      // this.tableData = this.tableData.concat(nextData)
     },
     async handleRemove(row) {
       let result = await this.$API.sat.reqDeleteSat(row.id)
@@ -62,32 +81,42 @@ export default {
         console.log(result.message)
       }
     },
+    // 根据搜索过滤表格数据
+    handleSearch() {
+      this.currentPage = 1
+      let filterSearch = this.search.trim()
+      if (!filterSearch) {
+        this.filterData = this.satelliteList
+        return
+      }
+      let filterResource = this.satelliteList.filter(item => {
+        if (String(item.id).includes(filterSearch)) {
+          return item
+        }
+      })
+      this.filterData = filterResource
+    },
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+    },
+    handleCreate() {
+      this.$router.push('/add_satellite')
+    },
     handleEdit(row) {
       this.$router.push(`edit_satellite/${row.id}`)
     },
-    tableListener() {
-      let _this = this
-      let dom = _this.$refs.satTable.bodyWrapper
-      dom.addEventListener("scroll", function() {
-        const scrollDistance = dom.scrollHeight - dom.scrollTop
-        console.log(scrollDistance)
-        if (scrollDistance <= 500) {
-          if (_this.currentPage < _this.totalPage) {
-            _this.currentPage++
-            _this.getData()
-          }
-        }
-      })
-    },
-    createSat() {
-      this.$router.push('/add_satellite')
-    }
+  },
+  created() {
+    console.log('created')
+    this.getData()
   },
   mounted() {
-    this.getData()
-    // this.tableListener()
-    
+    console.log('mounted')
+    this.handleSearch()
   },
+  updated() {
+    console.log('updated')
+  }
 }
 </script>
 
@@ -99,7 +128,22 @@ export default {
   margin-left: 50px
 }
 
-.satellite-table, .btn {
+.satellite-table {
   margin: 20px 0;
+}
+.btn {
+  margin: 20px 10px;
+}
+
+.search {
+  margin: 10px 0 20px 0;
+}
+.search-input {
+  width: 200px;
+  margin-right: 10px;
+}
+
+.pagination {
+  text-align: center;
 }
 </style>

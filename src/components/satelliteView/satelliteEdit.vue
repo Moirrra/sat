@@ -5,11 +5,14 @@
     </div>
     <div class="detail-form">
       <el-form label-position="left" label-width="80px" :model="satInfo">
-        <el-form-item label="norad_id">
-          <el-input type="number" v-model.number="satInfo.id" :disabled="$route.params.id"></el-input>
+        <el-form-item label="norad_id" v-if="$route.params.id">
+          <el-input type="number" v-model.number="satInfo.id" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="norad_id" v-else>
+          <el-input type="number" v-model.number="satInfo.id"></el-input>
         </el-form-item>
         <el-form-item label="name">
-          <el-input v-model="satInfo.name" :disabled="$route.params.id"></el-input>
+          <el-input v-model="satInfo.name"></el-input>
         </el-form-item>
         <el-form-item label="TLE1">
           <el-input v-model="satInfo.tle1"></el-input>
@@ -70,7 +73,8 @@ export default {
 #detail-wrap {
   width: 100%;
   height: 100%;
-  margin-left: 50px
+  min-height: 700px;
+  margin: 50px
 }
 
 .btn-back {
@@ -85,7 +89,8 @@ export default {
   width: 600px;
 }
 
-.btn-add {
-  margin: 10px 0;
+.btn-add, .btn-save {
+  margin-top: 20px;
+  margin-left: 600px
 }
 </style>

@@ -1,10 +1,12 @@
 import requests from '@/utils/request'
 
-// 创建卫星
-export const reqCreateCollection = (collection) => requests({
+// 创建Collection
+export const reqCreateCollection = (collection_name) => requests({
   url: `collection/create`,
   method: 'post',
-  data: collection,
+  data: {
+    collection_name
+  },
 })
 
 // 获取指定Collection

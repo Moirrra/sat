@@ -14,20 +14,18 @@
       </el-form>
     </div>
     <el-button type="text" @click="defaultSelect" v-show="$route.params.id">勾选原有卫星</el-button>
+    <div class="search">
+      <el-input class="search-input" v-model="search" size="mini" placeholder="输入norad_id搜索" />
+      <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
+    </div>
     <div class="satellite-table">
-      <el-table :data="satelliteList.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()))"
-        stripe max-height="400" style="width: 90%" ref="multipleTable" @selection-change="handleSelectionChange"
-        :row-key="getRowKeys">
+      <el-table :data="showData" stripe min-height="400" style="width: 95%" ref="multipleTable"
+        @selection-change="handleSelectionChange" :row-key="getRowKeys">
         <el-table-column type="selection" :reserve-selection="true" width="50">
         </el-table-column>
-        <el-table-column fixed prop="id" sortable label="Norad ID" width="250">
+        <el-table-column fixed prop="id" label="Norad ID" width="250">
         </el-table-column>
-        <el-table-column fixed prop="name" sortable label="Satellite Name">
-        </el-table-column>
-        <el-table-column fixed>
-          <template slot="header">
-            <el-input class="search-input" v-model="search" size="mini" placeholder="输入卫星名称搜索" />
-          </template>
+        <el-table-column fixed prop="name" label="Satellite Name">
         </el-table-column>
       </el-table>
     </div>
@@ -51,14 +49,23 @@ export default {
         name: '',
       },
       satIdList: [],
-      search: '',
       selection: [],
+      filterData: [],
+      currentPage: 1,
+      pageSize: 5,
+      search: ''
     }
   },
   computed: {
     ...mapState({
       satelliteList: state => state.satList,
     }),
+    // 表格展示的分页数据
+    showData() {
+      return this.filterData.slice(
+        (this.currentPage - 1) * this.pageSize,
+        this.currentPage * this.pageSize)
+    }
   },
   methods: {
     goBack() {
@@ -94,7 +101,6 @@ export default {
       return row.id
     },
     handleSelectionChange(selectedList) {
-      console.log('222')
       this.selection = selectedList
     },
     defaultSelect() {
@@ -112,6 +118,24 @@ export default {
         })
       }
     },
+    // 根据搜索过滤表格数据
+    handleSearch() {
+      this.currentPage = 1
+      let filterSearch = this.search.trim()
+      if (!filterSearch) {
+        this.filterData = this.satelliteList
+        return
+      }
+      let filterResource = this.satelliteList.filter(item => {
+        if (String(item.id).includes(filterSearch)) {
+          return item
+        }
+      })
+      this.filterData = filterResource
+    },
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+    },
     async handleSave() {
       let result = await this.$API.collection.reqUpdateCollection(this.collectionInfo)
       if (result.status == 0) {
@@ -119,36 +143,88 @@ export default {
       } else {
         console.log(result.message)
       }
-      // 已有
+      // 已有 删除原有assignment
       if (this.satIdList.length > 0) {
-        // 删除原有assignment
         let result1 = await this.$API.assignment.reqDeleteAssignmentByCollection(this.collectionInfo.id)
         if (result1.status == 0) {
           console.log(result1.message)
-
         } else {
           console.log(result1.message)
         }
       }
       // 新增assignment
+      let queue = []
       let c_id = this.collectionInfo.id
-      this.selection.forEach(async (item) =>  {
-        let s_id = item.id
-        let result2 = await this.$API.assignment.reqCreateAssignment(c_id, s_id)
-        if (result2.status == 0) {
-          console.log(result2.message)
+      this.selection.forEach((item) => {
+        queue.push(this.$API.assignment.reqCreateAssignment(c_id, item.id))
+      })
+      Promise.all(queue).then((results) => {
+        if (results[0].status == 0) {
+          console.log(results[0].message)
+          this.$message({
+            type: 'success',
+            message: '保存Collection成功!'
+          })
+          this.goCollectionInfo()
         } else {
-          console.log(result2.message)
+          console.log(results[0].message)
+          this.$message({
+            type: 'danger',
+            message: '保存Collection失败！'
+          })
         }
+      }).catch((err) => {
+        console.log(err)
       })
     },
-    handleCreate() { },
+    async handleCreate() {
+      // 创建collection
+      let result = await this.$API.collection.reqCreateCollection(this.collectionInfo.name)
+      if (result.status == 0) {
+        this.collectionInfo.id = result.data.collection_id
+      } else {
+        console.log(result.message)
+      }
+      // 创建assignment
+      let c_id = this.collectionInfo.id
+      let queue = []
+      this.selection.forEach((item) => {
+        queue.push(this.$API.assignment.reqCreateAssignment(c_id, item.id))
+      })
+      Promise.all(queue).then((results) => {
+        if (results[0].status == 0) {
+          console.log(results[0].message)
+          this.$message({
+            type: 'success',
+            message: '创建Collection成功!'
+          })
+          this.goCollectionInfo()
+        } else {
+          console.log(results[0].message)
+          this.$message({
+            type: 'danger',
+            message: '创建Collection失败！'
+          })
+        }
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
+    goCollectionInfo() {
+      this.$router.push({
+        name: 'Collection详情',
+        params: {
+          id: this.collectionInfo.id
+        }
+      })
+    }
   },
 
   mounted() {
     this.getSatData()
     this.getCollectionData()
     this.getAssignmentData()
+    this.handleSearch()
   },
 }
 </script>

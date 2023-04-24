@@ -38,8 +38,8 @@ export default {
         console.log(result.message)
       }
     },
+    // 点击查看Collection操作
     handleLook(row) {
-      // console.log(row.id)
       this.$router.push({
         name: 'Collection详情',
         params: {
@@ -47,12 +47,52 @@ export default {
         }
       })
     },
+    // 点击移除Collection操作
+    async handleRemove(row) {
+      this.$confirm('此操作将永久删除该Collection, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        this.deleteCollection(row.id)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+
+    },
+    // 点击创建Collection
     handleCreate() {
-      // this.$router.push({
-      //   name: '编辑Collection',
-      // })
       this.$router.push('/create_collection')
     },
+    // 删除Collection
+    async deleteCollection(id) {
+      // 删除对应assignment
+      let result = await this.$API.assignment.reqDeleteAssignmentByCollection(id)
+        if (result.status == 0) {
+          console.log(result.message)
+        } else {
+          console.log(result.message)
+        }
+        // 删除该collection
+        result = await this.$API.collection.reqDeleteCollection(id)
+        if (result.status == 0) {
+          console.log(result.message)
+          this.$message({
+            type: 'success',
+            message: '删除Collection成功!'
+          })
+          this.getData()
+        } else {
+          console.log(result.message)
+          this.$message({
+            type: 'danger',
+            message: '删除Collection失败！'
+          })
+        }
+    }
   },
   mounted() {
     this.getData()
@@ -68,7 +108,8 @@ export default {
   margin-left: 50px
 }
 
-.collection-table, .btn {
+.collection-table,
+.btn {
   margin-top: 20px
 }
 </style>
