@@ -7,17 +7,17 @@
     <div class="satellite-table">
       <el-table :data="satelliteList" border stripe max-height="480" style="width: 90%"
         @selection-change="handleSelectionChange" :row-key="getRowKeys">
-        <el-table-column type="selection" :reserve-selection="true" width="50">
+        <el-table-column type="selection" :reserve-selection="true" width="50" :resizable="false">
         </el-table-column>
-        <el-table-column fixed type="index">
+        <el-table-column fixed type="index" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="id" label="Norad ID" width="100">
+        <el-table-column fixed prop="id" label="Norad ID" width="100" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Satellite Name" width="180">
+        <el-table-column fixed prop="name" label="Satellite Name" width="180" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="tle1" label="TLE1">
+        <el-table-column fixed prop="tle1" label="TLE1" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="tle2" label="TLE2">
+        <el-table-column fixed prop="tle2" label="TLE2" :resizable="false">
         </el-table-column>
       </el-table>
     </div>

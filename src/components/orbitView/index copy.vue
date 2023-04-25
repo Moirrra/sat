@@ -4,14 +4,13 @@
       <div class="cesium-view">
         <div id="cesiumContainer"></div>
       </div>
-      
+      <div class="sat-list-session">
+        <SatelliteSelect @createOrbits="createOrbits"></SatelliteSelect>
+      </div>
     </div>
     <div class="content-right">
       <div class="sat-info-session">
         <SatelliteInfo ref="satInfo"></SatelliteInfo>
-      </div>
-      <div class="sat-list-session">
-        <CollectionSelect @createOrbits="createOrbits"></CollectionSelect>
       </div>
     </div>
   </div>
@@ -19,14 +18,15 @@
 
 <script>
 import * as Cesium from 'cesium'
-import CollectionSelect from './collectionSelect.vue'
+import SatelliteSelect from './satelliteSelect.vue'
 import SatelliteInfo from './satelliteInfo.vue'
+import { mapState } from 'vuex'
 import tles2czml from '@/utils/tles2czml.js'
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNzBjYTE0YS04YjkxLTQ5MWYtYWVlNC1jZGU4MmFmNDk5NzIiLCJpZCI6MTI1NTExLCJpYXQiOjE2Nzk3MzgzOTF9.eRbziwrHaWTSTQwRUzoZ97d6fjHiKwUgK21YKO5dMsk'
 
 export default {
   name: "OrbitView",
-  components: { CollectionSelect, SatelliteInfo },
+  components: { SatelliteSelect, SatelliteInfo },
   data() {
     return {
       viewer: null,
@@ -36,6 +36,11 @@ export default {
       timer: null,
       czmlPromise: null,
     };
+  },
+  computed: {
+    ...mapState({
+      satList: state => state.satList,
+    }),
   },
   mounted() {
     this.initViewer()
@@ -68,12 +73,12 @@ export default {
       this.$store.dispatch('getAllSats')
     },
     // 生成轨道数据
-    createOrbits(list) {
+    createOrbits(list = [965, 1002, 34839]) {
       this.viewer.dataSources.removeAll(true)
       let tleList = []
       for (let i = 0; i < list.length; i++) {
         tleList.push({
-          id: list[i].id,
+          id: list[i].satellite_id,
           name: list[i].name,
           tle1: list[i].tle1,
           tle2: list[i].tle2,
@@ -84,13 +89,14 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      // console.log(startTime, endTime)
-      // console.log(tleList)
+      console.log(startTime, endTime)
+      console.log(tleList)
       const czml = tles2czml(startTime, endTime, tleList)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
-      // console.log(this.viewer.dataSources)
+
+      console.log(this.viewer.dataSources)
     },
     // 点击实体
     handleClickEntity() {
@@ -154,23 +160,18 @@ export default {
 <style scoped>
 #view-wrap {
   display: flex;
-  align-items: stretch;
   width: 100%;
   height: 100%;
   padding-left: 20px;
+  /* background-color: #f2f2f7; */
   background-color: #fff;
 }
 
 .content-left {
-  width: 730px;
-  height: 600px;
-}
-
-.content-right {
   display: flex;
-  width: 350px;
   flex-direction: column;
-  justify-content: stretch;
+  min-width: 730px;
+  max-width: 730px;
 }
 
 /* Cesium */
@@ -179,17 +180,15 @@ export default {
   margin: 10px 5px;
   padding: 10px;
   background-color: #fff;
-  position: relative;
 }
 
 #cesiumContainer {
   min-width: 700px;
-  height: 550px;
+  height: 400px;
 }
 
 /* 卫星列表 */
 .sat-list-session {
-  height: 417px;
   border: 1px solid #dee2e6;
   margin: 5px;
   background-color: #fff;
@@ -209,10 +208,13 @@ export default {
   width: 100px;
 }
 
+.content-right {
+  width: 350px;
+  height: 100%;
+}
 
 /* 卫星信息展示 */
 .sat-info-session {
-  height: 136px;
   border: 1px solid #dee2e6;
   margin: 10px 5px;
   background-color: #fff;

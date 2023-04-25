@@ -5,7 +5,7 @@ import store from './store'
 import API from '@/api'
 
 import { Menu, Submenu, MenuItem, MenuItemGroup, Select, Option, 
-  Button, Table, TableColumn, Pagination, Form, FormItem, 
+  Button, Table, TableColumn, Pagination, Form, FormItem, Tag,
   Input, MessageBox, Message } from 'element-ui'
 
 Vue.use(Menu)
@@ -20,6 +20,7 @@ Vue.use(TableColumn)
 Vue.use(Pagination)
 Vue.use(Form)
 Vue.use(FormItem)
+Vue.use(Tag)
 Vue.use(Input)
 Vue.component(MessageBox.name, MessageBox)
 Vue.component(Message.name, Message)

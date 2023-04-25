@@ -13,21 +13,44 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-button type="text" @click="defaultSelect" v-show="$route.params.id">勾选原有卫星</el-button>
-    <div class="search">
-      <el-input class="search-input" v-model="search" size="mini" placeholder="输入norad_id搜索" />
-      <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
+    
+    <div class="table-view">
+      <div class="table-option">
+        <el-button type="text" @click="defaultSelect" v-show="$route.params.id">勾选原有卫星</el-button>
+        <div class="search">
+          <el-input class="search-input" v-model="search" size="mini" placeholder="输入norad_id搜索" />
+          <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
+        </div>
+      </div>
+      <div class="satellite-table">
+        <el-table :data="showData" border
+          stripe min-height="300" style="width: 90%" ref="multipleTable"
+          @selection-change="handleSelectionChange" :row-key="getRowKeys">
+          <el-table-column type="selection" :reserve-selection="true" width="50" :resizable="false">
+          </el-table-column>
+          <el-table-column fixed prop="id" label="Norad ID" :resizable="false">
+          </el-table-column>
+          <el-table-column fixed prop="name" label="Satellite Name" :resizable="false">
+          </el-table-column>
+        </el-table>
+      </div>
+      <div class="pagination">
+        <el-pagination
+          :page-size="pageSize"
+          :pager-count="11"
+          layout="total, prev, pager, next, jumper"
+          :total="filterData.length"
+          @current-change="handleCurrentChange">
+        </el-pagination>
+      </div>
     </div>
-    <div class="satellite-table">
-      <el-table :data="showData" stripe min-height="400" style="width: 95%" ref="multipleTable"
-        @selection-change="handleSelectionChange" :row-key="getRowKeys">
-        <el-table-column type="selection" :reserve-selection="true" width="50">
-        </el-table-column>
-        <el-table-column fixed prop="id" label="Norad ID" width="250">
-        </el-table-column>
-        <el-table-column fixed prop="name" label="Satellite Name">
-        </el-table-column>
-      </el-table>
+    <div class="selection-view">
+      <div class="label">已选择：</div>
+      <div class="tag-list">
+        <el-tag closable class="tag" 
+        v-for="tag in selection" :key="tag.id"
+        @close="handleCloseTag(tag)">{{tag.id}}</el-tag>
+      </div>
     </div>
     <div class="btn-save" @click="handleSave" v-if="$route.params.id">
       <el-button type="primary">保存Collection</el-button>
@@ -39,7 +62,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 export default {
   name: 'CollectionEdit',
   data() {
@@ -48,6 +70,7 @@ export default {
         id: '',
         name: '',
       },
+      satelliteList: [],
       satIdList: [],
       selection: [],
       filterData: [],
@@ -57,9 +80,6 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      satelliteList: state => state.satList,
-    }),
     // 表格展示的分页数据
     showData() {
       return this.filterData.slice(
@@ -94,8 +114,14 @@ export default {
       }
       // console.log(this.collectionInfo.satIdList)
     },
-    getSatData() {
-      this.$store.dispatch('getAllSats')
+    async getSatData() {
+      let result = await this.$API.sat.reqAllSats()
+      if (result.status == 0) {
+        this.satelliteList = result.data
+        this.filterData = this.satelliteList
+      } else {
+        console.log(result.message)
+      }
     },
     getRowKeys(row) {
       return row.id
@@ -117,6 +143,12 @@ export default {
           this.$refs.multipleTable.toggleRowSelection(row, true)
         })
       }
+    },
+    toggleSelection(row, flag) {
+      this.$refs.multipleTable.toggleRowSelection(row, flag)
+    },
+    handleCloseTag(tag) {
+      this.toggleSelection(tag, false)
     },
     // 根据搜索过滤表格数据
     handleSearch() {
@@ -219,12 +251,10 @@ export default {
       })
     }
   },
-
-  mounted() {
+  created() {
     this.getSatData()
     this.getCollectionData()
     this.getAssignmentData()
-    this.handleSearch()
   },
 }
 </script>
@@ -249,11 +279,43 @@ export default {
   width: 600px;
 }
 
-.search-input {
-  width: 200px;
-}
 
 .btn-save {
   margin: 10px 0;
+}
+
+.table-option {
+  width: 1000px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.search {
+  margin: 10px 0 20px 0;
+}
+.search-input {
+  width: 200px;
+  margin-right: 10px;
+}
+
+.pagination {
+  text-align: center;
+}
+
+.selection-view {
+  width: 800px;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  width: 80px;
+  
+}
+
+.tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 </style>

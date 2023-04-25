@@ -8,14 +8,15 @@
       <el-button class="btn-show" @click="showOrbits">展示轨道</el-button>
     </div>
     <div class="select-table">
-      <el-table :data="values" border style="width: 100%" max-height="200" @row-click="handleClick">
-        <el-table-column prop="satellite_id" label="norad_id" width="100">
+      <el-table :data="values" border style="width: 100%" max-height="200" 
+      @row-click="handleClick">
+        <el-table-column prop="satellite_id" label="norad_id" width="100" :resizable="false">
         </el-table-column>
-        <el-table-column prop="name" label="卫星名称" width="150">
+        <el-table-column prop="name" label="卫星名称" width="150" :resizable="false">
         </el-table-column>
-        <el-table-column prop="tle1" label="TLE1">
+        <el-table-column prop="tle1" label="TLE1" :resizable="false">
         </el-table-column>
-        <el-table-column prop="tle2" label="TLE2">
+        <el-table-column prop="tle2" label="TLE2" :resizable="false">
         </el-table-column>
       </el-table>
     </div>

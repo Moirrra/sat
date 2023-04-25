@@ -5,21 +5,18 @@
       <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
     </div>
     <div class="satellite-table">
-      <el-table :data="showData" 
-      border stripe min-height="480" style="width: 95%"
-      ref="satTable" 
-      >
-        <el-table-column fixed type="index">
+      <el-table :data="showData" border stripe min-height="480" style="width: 95%" ref="satTable">
+        <el-table-column fixed type="index" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="id" label="Norad ID" width="100">
+        <el-table-column fixed prop="id" label="Norad ID" width="100" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Satellite Name" width="180">
+        <el-table-column fixed prop="name" label="Satellite Name" width="180" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="tle1" label="TLE1" width="260">
+        <el-table-column fixed prop="tle1" label="TLE1" width="260" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="tle2" label="TLE2" width="260">
+        <el-table-column fixed prop="tle2" label="TLE2" width="260" :resizable="false">
         </el-table-column>
-        <el-table-column fixed label="操作" >
+        <el-table-column fixed label="操作" :resizable="false">
           <template slot-scope="scope">
             <el-button class="btn" @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
             <el-button class="btn" @click="handleRemove(scope.row)" type="text" size="small">移除</el-button>
@@ -28,11 +25,7 @@
       </el-table>
     </div>
     <div class="pagination">
-      <el-pagination
-        :page-size="pageSize"
-        :pager-count="11"
-        layout="total, prev, pager, next, jumper"
-        :total="filterData.length"
+      <el-pagination :page-size="pageSize" :pager-count="11" layout="total, prev, pager, next, jumper" :total="total"
         @current-change="handleCurrentChange">
       </el-pagination>
     </div>
@@ -43,7 +36,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 export default {
   name: 'SatelliteView',
   data() {
@@ -55,22 +47,34 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      satelliteList: state => state.satList,
-    }),
     // 表格展示的分页数据
     showData() {
-      return this.filterData.slice(
-        (this.currentPage-1) * this.pageSize,
-        this.currentPage * this.pageSize)
+      if (this.filterData) {
+        return this.filterData.slice(
+          (this.currentPage - 1) * this.pageSize,
+          this.currentPage * this.pageSize)
+      } else {
+        return this.satelliteList
+      }
+
+    },
+    total() {
+      if (this.filterData) {
+        return this.filterData.length
+      } else {
+        return 0
+      }
     }
   },
   methods: {
-    getData() {
-      this.$store.dispatch('getAllSats')
-      this.totalPage = Math.floor(this.satelliteList.length / this.pageSize) + 1
-      // let nextData = this.satelliteList.splice((this.currentPage-1) * this.pageSize, this.pageSize)
-      // this.tableData = this.tableData.concat(nextData)
+    async getData() {
+      let result = await this.$API.sat.reqAllSats()
+      if (result.status == 0) {
+        this.satelliteList = result.data
+        this.filterData = this.satelliteList
+      } else {
+        console.log(result.message)
+      }
     },
     async handleRemove(row) {
       let result = await this.$API.sat.reqDeleteSat(row.id)
@@ -107,16 +111,11 @@ export default {
     },
   },
   created() {
-    console.log('created')
     this.getData()
   },
   mounted() {
-    console.log('mounted')
     this.handleSearch()
   },
-  updated() {
-    console.log('updated')
-  }
 }
 </script>
 
@@ -131,6 +130,7 @@ export default {
 .satellite-table {
   margin: 20px 0;
 }
+
 .btn {
   margin: 20px 10px;
 }
@@ -138,6 +138,7 @@ export default {
 .search {
   margin: 10px 0 20px 0;
 }
+
 .search-input {
   width: 200px;
   margin-right: 10px;

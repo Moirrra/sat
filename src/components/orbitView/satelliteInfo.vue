@@ -100,6 +100,9 @@ export default {
 </script>
 
 <style scoped>
+#sat-info {
+
+}
 .sat-info-header {
   display: flex;
   flex-direction: column;

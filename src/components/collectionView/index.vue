@@ -1,12 +1,14 @@
 <template>
   <div id="collection-wrap">
     <div class="collection-table">
-      <el-table :data="collectionList" stripe max-height="480" style="width: 90%">
-        <el-table-column fixed type="index">
+      <el-table :data="collectionList" 
+        border stripe max-height="480" style="width: 90%">
+        <el-table-column fixed type="index" width="50" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Collection Name" style="width: 50%">
+        <el-table-column fixed prop="name" label="Collection Name" width="300"
+        style="width: 50%" :resizable="false">
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" :resizable="false">
           <template slot-scope="scope">
             <el-button @click="handleLook(scope.row)" type="text" size="small">查看</el-button>
             <el-button @click="handleRemove(scope.row)" type="text" size="small">移除</el-button>
@@ -112,4 +114,6 @@ export default {
 .btn {
   margin-top: 20px
 }
+
+
 </style>
