@@ -10,17 +10,22 @@ const collectionInfo = () => import('@/components/collectionView/collectionInfo.
 const collectionEdit = () => import('@/components/collectionView/collectionEdit.vue')
 const satelliteView = () => import('@/components/satelliteView/index.vue')
 const satelliteEdit = () => import('@/components/satelliteView/satelliteEdit.vue')
+const coverageView = () => import('@/components/coverageView/index.vue')
+const linkView = () => import('@/components/linkView/index.vue')
 
 const routes = [
   {
     path: '/',
     component: Home,
+    redirect:'/orbit',
     children: [
+      // orbitView
       {
         path: 'orbit',
         name: '卫星轨道',
         component: orbitView,
       },
+      // collectionView
       {
         path: 'collection',
         name: 'Collections',
@@ -41,6 +46,7 @@ const routes = [
         name: '创建Collection',
         component: collectionEdit,
       },
+      // satelliteView
       {
         path: 'satellite',
         name: 'Satellites',
@@ -56,6 +62,18 @@ const routes = [
         name: '编辑卫星',
         component: satelliteEdit,
       },
+      // coverageView
+      {
+        path: 'coverage',
+        name: '卫星覆盖区域',
+        component: coverageView,
+      },
+      // linkView
+      {
+        path: 'link',
+        name: '星间链路',
+        component: linkView,
+      }
     ]
   },
 ]

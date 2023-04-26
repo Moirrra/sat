@@ -13,7 +13,7 @@
         </el-form-item>
       </el-form>
     </div>
-    
+
     <div class="table-view">
       <div class="table-option">
         <el-button type="text" @click="defaultSelect" v-show="$route.params.id">勾选原有卫星</el-button>
@@ -23,8 +23,7 @@
         </div>
       </div>
       <div class="satellite-table">
-        <el-table :data="showData" border
-          stripe min-height="300" style="width: 90%" ref="multipleTable"
+        <el-table :data="showData" border stripe min-height="300" style="width: 90%" ref="multipleTable"
           @selection-change="handleSelectionChange" :row-key="getRowKeys">
           <el-table-column type="selection" :reserve-selection="true" width="50" :resizable="false">
           </el-table-column>
@@ -35,21 +34,16 @@
         </el-table>
       </div>
       <div class="pagination">
-        <el-pagination
-          :page-size="pageSize"
-          :pager-count="11"
-          layout="total, prev, pager, next, jumper"
-          :total="filterData.length"
-          @current-change="handleCurrentChange">
+        <el-pagination :page-size="pageSize" :pager-count="11" layout="total, prev, pager, next, jumper"
+          :total="filterData.length" @current-change="handleCurrentChange">
         </el-pagination>
       </div>
     </div>
     <div class="selection-view">
       <div class="label">已选择：</div>
       <div class="tag-list">
-        <el-tag closable class="tag" 
-        v-for="tag in selection" :key="tag.id"
-        @close="handleCloseTag(tag)">{{tag.id}}</el-tag>
+        <el-tag closable class="tag" v-for="tag in selection" :key="tag.id"
+          @close="handleCloseTag(tag)">{{ tag.id }}</el-tag>
       </div>
     </div>
     <div class="btn-save" @click="handleSave" v-if="$route.params.id">
@@ -66,17 +60,18 @@ export default {
   name: 'CollectionEdit',
   data() {
     return {
+      // 当前Collection
       collectionInfo: {
         id: '',
         name: '',
       },
-      satelliteList: [],
-      satIdList: [],
-      selection: [],
-      filterData: [],
-      currentPage: 1,
-      pageSize: 5,
-      search: ''
+      satelliteList: [], // 所有卫星列表
+      satIdList: [], // 原来的卫星列表
+      selection: [], // 选中卫星列表
+      filterData: [], // 过滤搜索的表格数据
+      currentPage: 1, // 当前页码
+      pageSize: 5, // 每页展示数据条数
+      search: '', // 搜索关键字
     }
   },
   computed: {
@@ -88,47 +83,73 @@ export default {
     }
   },
   methods: {
+    // 返回Collection
     goBack() {
       this.$router.push('/collection')
     },
+    // 返回CollectionInfo
+    goCollectionInfo() {
+      this.$router.push({
+        name: 'Collection详情',
+        params: {
+          id: this.collectionInfo.id
+        }
+      })
+    },
+    // 获取当前Collection数据
     async getCollectionData() {
       if (!this.$route.params.id) return
       let result = await this.$API.collection.reqCollectionById(this.$route.params.id)
+      console.log(result.message)
       if (result.status == 0) {
         this.collectionInfo.id = result.data.id
         this.collectionInfo.name = result.data.name
       } else {
-        console.log(result.message)
+        this.$message({
+          type: 'danger',
+          message: '获取Collection数据失败！'
+        })
       }
     },
+    // 获取原有卫星列表
     async getAssignmentData() {
       if (!this.$route.params.id) return
       let result = await this.$API.assignment.reqAssignmentByCollection(this.$route.params.id)
+      console.log(result.message)
       if (result.status == 0) {
         let aList = result.data
         for (let i = 0; i < aList.length; i++) {
           this.satIdList.push(aList[i].satellite_id)
         }
       } else {
-        console.log(result.message)
+        this.$message({
+          type: 'danger',
+          message: '获取Assignment列表失败！'
+        })
       }
-      // console.log(this.collectionInfo.satIdList)
     },
+    // 获取所有卫星列表
     async getSatData() {
       let result = await this.$API.sat.reqAllSats()
+      console.log(result.message)
       if (result.status == 0) {
         this.satelliteList = result.data
         this.filterData = this.satelliteList
       } else {
-        console.log(result.message)
+        this.$message({
+          type: 'danger',
+          message: '获取卫星列表失败！'
+        })
       }
     },
     getRowKeys(row) {
       return row.id
     },
+    // 多选变化事件
     handleSelectionChange(selectedList) {
       this.selection = selectedList
     },
+    // 勾选原有卫星
     defaultSelect() {
       let list = []
       this.satelliteList.forEach((item) => {
@@ -144,11 +165,9 @@ export default {
         })
       }
     },
-    toggleSelection(row, flag) {
-      this.$refs.multipleTable.toggleRowSelection(row, flag)
-    },
+    // 删除标签
     handleCloseTag(tag) {
-      this.toggleSelection(tag, false)
+      this.$refs.multipleTable.toggleRowSelection(tag, false)
     },
     // 根据搜索过滤表格数据
     handleSearch() {
@@ -165,9 +184,11 @@ export default {
       })
       this.filterData = filterResource
     },
+    // 页数变化事件
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage
     },
+    // 点击保存Collection
     async handleSave() {
       let result = await this.$API.collection.reqUpdateCollection(this.collectionInfo)
       if (result.status == 0) {
@@ -209,6 +230,7 @@ export default {
         console.log(err)
       })
     },
+    // 点击创建Collection
     async handleCreate() {
       // 创建collection
       let result = await this.$API.collection.reqCreateCollection(this.collectionInfo.name)
@@ -224,15 +246,14 @@ export default {
         queue.push(this.$API.assignment.reqCreateAssignment(c_id, item.id))
       })
       Promise.all(queue).then((results) => {
+        console.log(results[0].message)
         if (results[0].status == 0) {
-          console.log(results[0].message)
           this.$message({
             type: 'success',
             message: '创建Collection成功!'
           })
           this.goCollectionInfo()
         } else {
-          console.log(results[0].message)
           this.$message({
             type: 'danger',
             message: '创建Collection失败！'
@@ -242,14 +263,6 @@ export default {
         console.log(err)
       })
     },
-    goCollectionInfo() {
-      this.$router.push({
-        name: 'Collection详情',
-        params: {
-          id: this.collectionInfo.id
-        }
-      })
-    }
   },
   created() {
     this.getSatData()
@@ -293,6 +306,7 @@ export default {
 .search {
   margin: 10px 0 20px 0;
 }
+
 .search-input {
   width: 200px;
   margin-right: 10px;
@@ -311,7 +325,7 @@ export default {
 
 .label {
   width: 80px;
-  
+
 }
 
 .tag {

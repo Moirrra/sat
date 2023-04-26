@@ -40,10 +40,10 @@ export default {
   name: 'SatelliteView',
   data() {
     return {
-      filterData: [],
-      currentPage: 1,
-      pageSize: 5,
-      search: ''
+      filterData: [], // 过滤搜索的表格数据
+      currentPage: 1, // 当前页码
+      pageSize: 5,  // 每页数据条数
+      search: '', // 搜索关键字
     }
   },
   computed: {
@@ -58,6 +58,7 @@ export default {
       }
 
     },
+    // 总数据条数
     total() {
       if (this.filterData) {
         return this.filterData.length
@@ -67,22 +68,18 @@ export default {
     }
   },
   methods: {
+    // 获取所有卫星列表
     async getData() {
       let result = await this.$API.sat.reqAllSats()
+      console.log(result.message)
       if (result.status == 0) {
         this.satelliteList = result.data
         this.filterData = this.satelliteList
       } else {
-        console.log(result.message)
-      }
-    },
-    async handleRemove(row) {
-      let result = await this.$API.sat.reqDeleteSat(row.id)
-      if (result.status == 0) {
-        console.log(result.message)
-        this.getData()
-      } else {
-        console.log(result.message)
+        this.$message({
+          type: 'danger',
+          message: '获取卫星列表失败！'
+        })
       }
     },
     // 根据搜索过滤表格数据
@@ -100,15 +97,50 @@ export default {
       })
       this.filterData = filterResource
     },
+    // 当前页变化事件
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage
     },
-    handleCreate() {
-      this.$router.push('/add_satellite')
+    // 点击移除卫星
+    async handleRemove(row) {
+      this.$confirm('此操作将永久删除该卫星, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await this.deleteSat(row.id)
+        this.getData()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
+    // 点击编辑卫星
     handleEdit(row) {
       this.$router.push(`edit_satellite/${row.id}`)
     },
+    // 点击创建卫星
+    handleCreate() {
+      this.$router.push('/add_satellite')
+    },
+    // 删除卫星
+    async deleteSat(id) {
+      let result = await this.$API.sat.reqDeleteSat(id)
+      console.log(result.message)
+      if (result.status == 0) {
+        this.$message({
+          type: 'success',
+          message: '删除卫星成功!'
+        })
+      } else {
+        this.$message({
+          type: 'danger',
+          message: '删除卫星失败！'
+        })
+      }
+    }
   },
   created() {
     this.getData()

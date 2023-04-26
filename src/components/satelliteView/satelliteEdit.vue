@@ -1,6 +1,6 @@
 <template>
   <div id="detail-wrap">
-    <div class="btn-back" @click="goBack()">
+    <div class="btn-back" @click="goBack">
       <el-button>返回</el-button>
     </div>
     <div class="detail-form">
@@ -49,16 +49,21 @@ export default {
     goBack() {
       this.$router.push('/satellite')
     },
+    // 获取当前卫星数据
     async getData() {
       if (this.$route.params.id) {
         let result = await this.$API.sat.reqSatById(this.$route.params.id)
+        console.log(result.message)
         if (result.status == 0) {
           this.satInfo.id = result.data.id
           this.satInfo.name = result.data.name
           this.satInfo.tle1 = result.data.tle1
           this.satInfo.tle2 = result.data.tle2
         } else {
-          console.log(result.message)
+          this.$message({
+            type: 'danger',
+            message: '获取卫星数据失败！'
+          })
         }
       }
     }
@@ -89,7 +94,8 @@ export default {
   width: 600px;
 }
 
-.btn-add, .btn-save {
+.btn-add,
+.btn-save {
   margin-top: 20px;
   margin-left: 600px
 }

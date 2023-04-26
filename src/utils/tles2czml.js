@@ -40,7 +40,7 @@ module.exports = function tles2czml(start, end, tles) {
     // 初始化一条卫星记录
     let satrec = satellite.twoline2satrec(tles[index].tle1, tles[index].tle2)
     //satrec.no：以弧度/分钟为单位的平均运动，一天有1440分钟，一弧度是0.159155圈
-    // 一天内绕地旋转圈数
+    // 每天绕地旋转圈数
     let totalIntervalsInDay = satrec.no * 1440 * 0.159155
 
     // 运行一圈的分钟数

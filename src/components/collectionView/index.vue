@@ -5,8 +5,7 @@
         border stripe max-height="480" style="width: 90%">
         <el-table-column fixed type="index" width="50" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Collection Name" width="300"
-        style="width: 50%" :resizable="false">
+        <el-table-column fixed prop="name" label="Collection Name" :resizable="false">
         </el-table-column>
         <el-table-column label="操作" :resizable="false">
           <template slot-scope="scope">
@@ -31,13 +30,17 @@ export default {
     }
   },
   methods: {
+    // 获取Collection列表
     async getData() {
       let result = await this.$API.collection.reqAllCollections()
+      console.log(result.message)
       if (result.status == 0) {
-        // console.log(result.message)
         this.collectionList = result.data
       } else {
-        console.log(result.message)
+        this.$message({
+          type: 'danger',
+          message: '获取Collection列表失败！'
+        })
       }
     },
     // 点击查看Collection操作
@@ -56,14 +59,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        this.deleteCollection(row.id)
+        await this.deleteCollection(row.id)
+        this.getData()
       }).catch(() => {
         this.$message({
           type: 'info',
           message: '已取消删除'
         })
       })
-
     },
     // 点击创建Collection
     handleCreate() {
@@ -80,15 +83,13 @@ export default {
         }
         // 删除该collection
         result = await this.$API.collection.reqDeleteCollection(id)
+        console.log(result.message)
         if (result.status == 0) {
-          console.log(result.message)
           this.$message({
             type: 'success',
             message: '删除Collection成功!'
           })
-          this.getData()
         } else {
-          console.log(result.message)
           this.$message({
             type: 'danger',
             message: '删除Collection失败！'

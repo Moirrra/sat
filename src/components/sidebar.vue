@@ -17,12 +17,16 @@
           <i class="el-icon-s-help"></i>
           <span slot="title">卫星轨道</span>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/coverage">
           <i class="el-icon-menu"></i>
-          <span slot="title">卫星扫描区域</span>
+          <span slot="title">卫星覆盖区域</span>
+        </el-menu-item>
+        <el-menu-item index="/link">
+          <i class="el-icon-share"></i>
+          <span slot="title">星间链路</span>
         </el-menu-item>
         <el-menu-item index="/collection">
-          <i class="el-icon-document"></i>
+          <i class="el-icon-folder"></i>
           <span slot="title">Collections</span>
         </el-menu-item>
         <el-menu-item index="/satellite">

@@ -2,15 +2,17 @@
   <div id="select-wrap">
     <div class="select-list-header">已选卫星列表</div>
     <div class="select-list">
-      <el-select class="select" v-model="collection" value-key="id" 
-      filterable placeholder="请选择Collection">
+      <el-select class="select" v-model="collection" value-key="id"
+        filterable placeholder="请选择Collection">
         <el-option v-for="item in collectionList" :key="item.id" :value="item" :label="item.name">
         </el-option>
       </el-select>
       <el-button class="btn-show" @click="showOrbits">展示轨道</el-button>
     </div>
     <div class="select-table">
-      <el-table :data="satelliteList" border max-height="310" style="width: 100%" @row-click="handleClick">
+      <el-table :data="satelliteList" 
+        border max-height="310" style="width: 100%" 
+        @row-click="handleClick">
         <el-table-column fixed prop="id" label="norad_id" width="100" :resizable="false">
         </el-table-column>
         <el-table-column fixed prop="name" label="卫星名称" :resizable="false">
@@ -25,7 +27,8 @@ export default {
   name: 'CollectionSelect',
   data() {
     return {
-      collectionList: [],
+      collectionList: [], // 所有Collection列表
+      // 已选Collection
       collection: {
         id: '',
         name: '',
@@ -38,44 +41,54 @@ export default {
     collection: {
       deep: true,
       handler() {
-        this.getSatData()
+        this.getAssignmentData()
       }
     }
   },
   methods: {
-    // 向服务请请求获取collection列表
+    // 获取collection列表
     async getCollectionData() {
       let result = await this.$API.collection.reqAllCollections()
       if (result.status == 0) {
         this.collectionList = result.data
       }
     },
-    async getSatData() {
-      console.log('getSatData')
+    // 获取Assignment
+    async getAssignmentData() {
       // 获取assignment
-      let result1 = await this.$API.assignment.reqAssignmentByCollection(this.collection.id)
-      if (result1.status == 0) {
-        this.assignmentList = result1.data
-        let sList = []
-        for (let i = 0; i < this.assignmentList.length; i++) {
-          sList.push(this.assignmentList[i].satellite_id)
-        }
-        // 获取卫星信息
-        let result2 = await this.$API.sat.reqSatByIdList(sList)
-        if (result2.status == 0) {
-          this.satelliteList = result2.data
-        } else {
-          console.log(result2.message)
-        }
+      let result = await this.$API.assignment.reqAssignmentByCollection(parseInt(this.collection.id))
+      console.log(result.message)
+      if (result.status == 0) {
+        this.assignmentList = result.data
+        await this.getSatData()
       } else {
-        console.log(result1.message)
+        this.$message({
+          type: 'danger',
+          message: '获取Assignment列表失败！'
+        })
+      }
+    },
+    // 获取卫星列表
+    async getSatData() {
+      let sList = []
+      for (let i = 0; i < this.assignmentList.length; i++) {
+        sList.push(this.assignmentList[i].satellite_id)
+      }
+      let result = await this.$API.sat.reqSatByIdList(sList)
+      console.log(result.message)
+      if (result.status == 0) {
+        this.satelliteList = result.data
+      } else {
+        this.$message({
+          type: 'danger',
+          message: '获取卫星列表失败！'
+        })
       }
     },
     showOrbits() {
       if (this.satelliteList) {
         this.$emit('createOrbits', this.satelliteList)
       }
-       
     },
     handleClick(row) {
       console.log('handleClick', row.id)
@@ -90,8 +103,6 @@ export default {
 }
 </script>
 <style scoped>
-#select-wrap {
-}
 .select-list-header {
   display: flex;
   flex-direction: column;
