@@ -21,7 +21,6 @@
 import * as Cesium from 'cesium'
 import CollectionSelect from './collectionSelect.vue'
 import SatelliteInfo from './satelliteInfo.vue'
-import tles2czml from '@/utils/tles2czml.js'
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNzBjYTE0YS04YjkxLTQ5MWYtYWVlNC1jZGU4MmFmNDk5NzIiLCJpZCI6MTI1NTExLCJpYXQiOjE2Nzk3MzgzOTF9.eRbziwrHaWTSTQwRUzoZ97d6fjHiKwUgK21YKO5dMsk'
 
 export default {
@@ -39,7 +38,7 @@ export default {
   },
   mounted() {
     this.initViewer()
-    this.getData()
+
     this.handleClickEntity()
     this.$bus.$on('createOrbits', this.createOrbits)
     this.$bus.$on('getEntity', this.getEntity)
@@ -49,6 +48,24 @@ export default {
     this.$bus.$off('getEntity')
   },
   methods: {
+    async getInitData(start, end, czml) {
+      let result = await this.$API.orbit.reqInitOrbit(start, end)
+      if (result.status == 0) {
+        czml.push(result.data)
+      } else {
+        console.log(result.message)
+      }
+    },
+    async getOrbitData(start, end, satList, czml) {
+      satList.forEach(async (sat) => {
+        let result = await this.$API.orbit.reqCreateOrbit(start, end, sat)
+        if (result.status == 0) {
+          czml.push(result.data)
+        } else {
+          console.log(result.message)
+        }
+      })
+    },
     // 初始化viewer
     initViewer() {
       this.viewer = new Cesium.Viewer('cesiumContainer', {
@@ -61,10 +78,6 @@ export default {
       })
       // 隐藏logo
       this.viewer._cesiumWidget._creditContainer.style.display = "none"
-    },
-    // 向服务请请求获取默认卫星轨道数据
-    getData() {
-      this.$store.dispatch('getAllSats')
     },
     // 生成轨道数据
     createOrbits(list) {
@@ -83,13 +96,15 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      // console.log(startTime, endTime)
-      // console.log(tleList)
-      const czml = tles2czml(startTime, endTime, tleList)
+      let czml = []
+      this.getInitData(startTime, endTime, czml)
+      this.getOrbitData(startTime, endTime, tleList, czml)
+      console.log(czml)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
-      // console.log(this.viewer.dataSources)
+      console.log(this.czmlPromise)
+      console.log(this.viewer.dataSources)
     },
     // 点击实体
     handleClickEntity() {

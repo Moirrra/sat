@@ -118,10 +118,10 @@ module.exports = function tles2czml(start, end, tles) {
       "label": {
         "fillColor": {
           "rgba": [
-            255, 0, 255, 255
+            255, 255, 255, 255
           ]
         },
-        "font": "11pt Lucida Console",
+        "font": "12pt Helvetica",
         "horizontalOrigin": "LEFT",
         "outlineColor": {
           "rgba": [
@@ -156,6 +156,7 @@ module.exports = function tles2czml(start, end, tles) {
                 Math.floor(255 * Math.random(0, 1)), 
                 Math.floor(255 * Math.random(0, 1)), 
                 255
+                // 255, 255, 255, 100
               ]
             }
           }

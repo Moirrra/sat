@@ -35,12 +35,11 @@ export default {
       clickHandler: null,
       timer: null,
       czmlPromise: null,
-      czml: [],
     };
   },
   mounted() {
     this.initViewer()
-
+    this.getData()
     this.handleClickEntity()
     this.$bus.$on('createOrbits', this.createOrbits)
     this.$bus.$on('getEntity', this.getEntity)
@@ -50,47 +49,6 @@ export default {
     this.$bus.$off('getEntity')
   },
   methods: {
-    async createCZML(start, end, satList) {
-      const firstPacket = await this.getInitData(start, end)
-      let tempCZML = this.getOrbitData(start, end, satList)
-      this.czml.push(firstPacket)
-      for (let i = 0; i < tempCZML.length; i++) {
-        this.czml.push(tempCZML[i])
-      }
-    },
-    async getInitData(start, end) {
-      let firstPacket = {}
-      let result = await this.$API.orbit.reqInitOrbit(start, end)
-      if (result.status == 0) {
-        firstPacket = result.data
-      } else {
-        console.log(result.message)
-      }
-      return firstPacket
-    },
-    getOrbitData(start, end, satList) {
-      let queue = []
-      let tempCZML = []
-      satList.forEach((sat) => {
-        queue.push(this.$API.orbit.reqCreateOrbit(start, end, sat))
-      })
-      Promise.all(queue).then((results) => {
-        if (results[0].status == 0) {
-          results.forEach((result) => {
-            tempCZML.push(result.data)
-          })
-        } else {
-          console.log(results[0].message)
-          this.$message({
-            type: 'danger',
-            message: '获取轨道数据失败！'
-          })
-        }
-      }).catch((err) => {
-        console.log(err)
-      })
-      return tempCZML
-    },
     // 初始化viewer
     initViewer() {
       this.viewer = new Cesium.Viewer('cesiumContainer', {
@@ -103,6 +61,10 @@ export default {
       })
       // 隐藏logo
       this.viewer._cesiumWidget._creditContainer.style.display = "none"
+    },
+    // 向服务请请求获取默认卫星轨道数据
+    getData() {
+      this.$store.dispatch('getAllSats')
     },
     // 生成轨道数据
     createOrbits(list) {
@@ -121,11 +83,13 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
+      // console.log(startTime, endTime)
+      // console.log(tleList)
       const czml = tles2czml(startTime, endTime, tleList)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
-
+      // console.log(this.viewer.dataSources)
     },
     // 点击实体
     handleClickEntity() {
