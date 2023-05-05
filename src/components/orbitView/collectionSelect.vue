@@ -89,7 +89,7 @@ export default {
     },
     showOrbits() {
       if (this.satelliteList) {
-        this.$emit('createOrbits', this.satelliteList)
+        this.$bus.$emit('createOrbits', this.satelliteList)
       }
     },
     handleClick(row) {

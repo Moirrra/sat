@@ -159,7 +159,7 @@ export default {
           time: timeStr,
         }
         this.$bus.$emit('updateInfo', lonLatHeight)
-      }, 1000)
+      }, 2000)
     },
   },
 }

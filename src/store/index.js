@@ -20,6 +20,9 @@ const mutations = {
   },
   GET_SAT_BY_ID(state, data) {
     state.satOnShow = data
+  },
+  INIT_SAT_ON_SHOW(state) {
+    state.satOnShow = {}
   }
 }
 

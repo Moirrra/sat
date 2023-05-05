@@ -3,7 +3,7 @@ const satellite = require('satellite.js')
 const julian = require('julian')
 
 
-module.exports = function tles2czml(start, end, tles, gap = 300) {
+module.exports = function tles2czml(start, end, tles, gap = 300, completed = false, fixedColor = false, colorStr = "") {
   // 间隔的分钟数
   let minsInDuration = (end.getTime() - start.getTime()) / 60000
   // 设置开始时间
@@ -25,6 +25,10 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
     }
   })
 
+  // 轨道颜色
+  // fixedColor true所有卫星轨道固定一种颜色 false随机
+  let color = fixedColor ? rgba2array(colorStr) : ""
+
   // 处理每一个卫星
   for (let index = 0; index < tles.length; index++) {
     if (!tles[index].name || !tles[index].tle1 || !tles[index].tle2) {
@@ -34,6 +38,9 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
     let sat_id = tles[index].id
     let sat_name = tles[index].name
     let pos = [] // 保存位置信息
+
+    if (!fixedColor) color = getColor()
+    // console.log(color)
 
     // 初始化一条卫星记录
     let satrec = satellite.twoline2satrec(tles[index].tle1, tles[index].tle2)
@@ -57,6 +64,9 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
       positionEci.z = positionEci.z * 1000
       pos.push(i - sec, positionEci.x, positionEci.y, positionEci.z)
     }
+
+    // 轨迹保留
+    let leadTime = completed ? minsPerInterval*60 : 0
 
     let initialCZMLProps =
     {
@@ -92,27 +102,26 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
         "material": {
           "solidColor": {
             "color": {
-              "rgba": [
-                // 随机生成轨道颜色
-                Math.floor(255 * Math.random(0, 1)), 
-                Math.floor(255 * Math.random(0, 1)), 
-                Math.floor(255 * Math.random(0, 1)), 
-                255
-                // 255, 255, 255, 100
-              ]
+              "rgba": color,
             }
           }
         },
         "resolution": 120,
-        // 动画绘制前方的轨迹时间 减少
-        "leadTime": 0,
-        // 动画绘制出的轨迹时间 增加
+        // 动画绘制前方的轨迹时间 
+        "leadTime": leadTime,
+        // 动画绘制出的轨迹时间
         "trailTime": minsPerInterval*60
       },
-      "model": {
-        "show": true,
-        "gltf": "models/satellite.glb",
-        "minimumPixelSize": 55,
+      // "model": {
+      //   "show": true,
+      //   "gltf": "models/satellite.glb",
+      //   "minimumPixelSize": 55,
+      // },
+      "point": {
+        "color": {
+            "rgba": color
+        },
+        "pixelSize": 10
       },
       "position": {
         // 采用拉格朗日插值法
@@ -128,4 +137,21 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
     tempCZML.push(initialCZMLProps)
   }
   return tempCZML
+}
+
+// 随机生成一种颜色
+function getColor() {
+  return [
+    Math.floor(100 + 155 * Math.random(0, 1)),
+    Math.floor(100 + 155 * Math.random(0, 1)),
+    Math.floor(100 + 155 * Math.random(0, 1)),
+    255
+  ]
+}
+
+function rgba2array(rgba) {
+  let val = rgba.match(/(\d(\.\d+)?)+/g)
+  let res = val.map(x => parseInt(x))
+  res[3] = 255
+  return res
 }

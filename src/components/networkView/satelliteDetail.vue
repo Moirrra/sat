@@ -31,7 +31,7 @@
 <script>
 import { mapState } from 'vuex'
 export default {
-  name: 'SatelliteInfo',
+  name: 'SatelliteDetail',
   data() {
     return {
       longitude: '',
@@ -58,12 +58,12 @@ export default {
   },
   mounted() {
     this.$store.commit('INIT_SAT_ON_SHOW')
-    this.$bus.$on('getSatInfoById', this.getSatInfoById)
-    this.$bus.$on('updateInfo', this.updateInfo)
+    this.$bus.$on('getSatInfoById_network', this.getSatInfoById)
+    this.$bus.$on('updateInfo_network', this.updateInfo)
   },
   beforeDestroy() {
-    this.$bus.$off('getSatInfoById')
-    this.$bus.$off('updateInfo')
+    this.$bus.$off('getSatInfoById_network')
+    this.$bus.$off('updateInfo_network')
   }
 }
 </script>

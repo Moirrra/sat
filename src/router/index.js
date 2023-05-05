@@ -5,6 +5,7 @@ Vue.use(Router)
 
 const Home = () => import('@/components/home.vue')
 const orbitView = () => import('@/components/orbitView/index.vue')
+const networkView = () => import('@/components/networkView/index.vue')
 const collectionView = () => import('@/components/collectionView/index.vue')
 const collectionInfo = () => import('@/components/collectionView/collectionInfo.vue')
 const collectionEdit = () => import('@/components/collectionView/collectionEdit.vue')
@@ -25,6 +26,12 @@ const routes = [
         path: 'orbit',
         name: '卫星轨道',
         component: orbitView,
+      },
+      // networkView
+      {
+        path: 'network',
+        name: '星座组网',
+        component: networkView,
       },
       // collectionView
       {

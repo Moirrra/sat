@@ -17,6 +17,10 @@
           <i class="el-icon-s-help"></i>
           <span slot="title">卫星轨道</span>
         </el-menu-item>
+        <el-menu-item index="/network">
+          <i class="el-icon-s-help"></i>
+          <span slot="title">星座组网</span>
+        </el-menu-item>
         <el-menu-item index="/coverage">
           <i class="el-icon-menu"></i>
           <span slot="title">卫星覆盖区域</span>

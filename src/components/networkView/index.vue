@@ -4,14 +4,14 @@
       <div class="cesium-view">
         <div id="cesiumContainer"></div>
       </div>
-      
+
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteInfo ref="satInfo"></SatelliteInfo>
+        <SatelliteDetail ref="satInfo"></SatelliteDetail>
       </div>
       <div class="sat-list-session">
-        <CollectionSelect></CollectionSelect>
+        <CollectionMultiSelect></CollectionMultiSelect>
       </div>
     </div>
   </div>
@@ -19,14 +19,14 @@
 
 <script>
 import * as Cesium from 'cesium'
-import CollectionSelect from './collectionSelect.vue'
-import SatelliteInfo from './satelliteInfo.vue'
+import CollectionMultiSelect from './collectionMultiSelect.vue'
+import SatelliteDetail from './satelliteDetail.vue'
 import tles2czml from '@/utils/tles2czml.js'
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNzBjYTE0YS04YjkxLTQ5MWYtYWVlNC1jZGU4MmFmNDk5NzIiLCJpZCI6MTI1NTExLCJpYXQiOjE2Nzk3MzgzOTF9.eRbziwrHaWTSTQwRUzoZ97d6fjHiKwUgK21YKO5dMsk'
 
 export default {
-  name: "OrbitView",
-  components: { CollectionSelect, SatelliteInfo },
+  name: "NetworkView",
+  components: { CollectionMultiSelect, SatelliteDetail },
   data() {
     return {
       viewer: null,
@@ -41,11 +41,12 @@ export default {
     this.initViewer()
     this.getData()
     this.handleClickEntity()
-    this.$bus.$on('createOrbits', this.createOrbits)
+    this.$bus.$on('createOrbitsNetwork', this.createOrbitsNetwork)
     this.$bus.$on('getEntity', this.getEntity)
   },
   beforeDestroy() {
-    this.$bus.$off('createOrbits')
+    clearInterval(this.timer)
+    this.$bus.$off('createOrbitsNetwork')
     this.$bus.$off('getEntity')
   },
   methods: {
@@ -59,15 +60,16 @@ export default {
         fullscreenButton: true,
         useDefaultRenderLoop: true,
         // 调用高德地图api，使用默认的bingmaps会报错：get net::ERR_CONNECTION_RESET错误
-        imageryProvider: new Cesium.UrlTemplateImageryProvider({ 
-          url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",}),
+        imageryProvider: new Cesium.UrlTemplateImageryProvider({
+          url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+        }),
       })
       // 隐藏logo
       this.viewer._cesiumWidget._creditContainer.style.display = "none"
-      if(Cesium.FeatureDetection.supportsImageRenderingPixelated()){//判断是否支持图像渲染像素化处理
+      if (Cesium.FeatureDetection.supportsImageRenderingPixelated()) {//判断是否支持图像渲染像素化处理
         this.viewer.resolutionScale = window.devicePixelRatio
       }
-      
+
       //是否开启抗锯齿
       this.viewer.scene.fxaa = true
       this.viewer.scene.postProcessStages.fxaa.enabled = true
@@ -80,30 +82,34 @@ export default {
     getData() {
       this.$store.dispatch('getAllSats')
     },
-    // 生成轨道数据
-    createOrbits(list) {
+    // 生成星座组网轨道数据
+    createOrbitsNetwork(nList, colorList) {
+      console.log('createOrbitsNetwork')
+      // console.log(colorList)
       this.viewer.dataSources.removeAll(true)
-      let tleList = []
-      for (let i = 0; i < list.length; i++) {
-        tleList.push({
-          id: list[i].id,
-          name: list[i].name,
-          tle1: list[i].tle1,
-          tle2: list[i].tle2,
-        })
-      }
-      let startTime = new Date()
-      let endTime = new Date()
-      endTime = endTime.setDate(endTime.getDate() + 1)
-      endTime = new Date(endTime)
+      for (let j = 0; j < nList.length; j++) {
+        let tleList = []
+        let color = colorList.length == nList.length ? colorList[j] : 'rgba(255,255,255,1)'
+        // console.log(color)
+        for (let i = 0; i < nList[j].length; i++) {
+          tleList.push({
+            id: nList[j][i].id,
+            name: nList[j][i].name,
+            tle1: nList[j][i].tle1,
+            tle2: nList[j][i].tle2,
+          })
+        }
+        let startTime = new Date()
+        let endTime = new Date()
+        endTime = endTime.setDate(endTime.getDate() + 1)
+        endTime = new Date(endTime)
 
-      // console.log(startTime, endTime)
-      // console.log(tleList)
-      const czml = tles2czml(startTime, endTime, tleList)
-      this.viewer.dataSources.add(
-        this.czmlPromise = Cesium.CzmlDataSource.load(czml)
-      )
-      // console.log(this.viewer.dataSources)
+        let czml = tles2czml(startTime, endTime, tleList, 300, true, true, color)
+        let czmlData = Cesium.CzmlDataSource.load(czml)
+        console.log('1')
+        this.viewer.dataSources.add(czmlData)
+      }
+      
     },
     // 点击实体
     handleClickEntity() {
@@ -113,7 +119,7 @@ export default {
         let pick = _this.viewer.scene.pick(event.position)
         if (Cesium.defined(pick)) {
           console.log(pick.id.id) // entity.id
-          _this.$bus.$emit('getSatInfoById', pick.id.id)
+          _this.$bus.$emit('getSatInfoById_network', pick.id.id)
           // 获取当前实体经纬度高度
           clearInterval(_this.timer)
           _this.getEntityInfo(pick.id)
@@ -138,9 +144,9 @@ export default {
     // 获取实体经纬度高度
     getEntityInfo(entity) {
       // const _this = this
-      if (!entity) 
+      if (!entity)
         return
-      this.timer = setInterval(()=>{
+      this.timer = setInterval(() => {
         let curTime = this.viewer.clock.currentTime
         let timeStr = curTime.toString()
         timeStr = timeStr.replace(/T/, ' ').replace(/Z/, '').replace(/\.\d+/g, '')
@@ -157,7 +163,7 @@ export default {
           // elevation: elevation,
           time: timeStr,
         }
-        this.$bus.$emit('updateInfo', lonLatHeight)
+        this.$bus.$emit('updateInfo_network', lonLatHeight)
       }, 1000)
     },
   },
