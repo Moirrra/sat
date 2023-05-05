@@ -9,6 +9,7 @@ const collectionView = () => import('@/components/collectionView/index.vue')
 const collectionInfo = () => import('@/components/collectionView/collectionInfo.vue')
 const collectionEdit = () => import('@/components/collectionView/collectionEdit.vue')
 const satelliteView = () => import('@/components/satelliteView/index.vue')
+const satelliteInfo = () => import('@/components/satelliteView/satelliteInfo.vue')
 const satelliteEdit = () => import('@/components/satelliteView/satelliteEdit.vue')
 const coverageView = () => import('@/components/coverageView/index.vue')
 const linkView = () => import('@/components/linkView/index.vue')
@@ -51,6 +52,11 @@ const routes = [
         path: 'satellite',
         name: 'Satellites',
         component: satelliteView,
+      },
+      {
+        path: 'satellite_info/:id',
+        name: '卫星详情',
+        component: satelliteInfo,
       },
       {
         path: 'add_satellite',

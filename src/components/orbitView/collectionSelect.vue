@@ -13,7 +13,9 @@
       <el-table :data="satelliteList" 
         border max-height="310" style="width: 100%" 
         @row-click="handleClick">
-        <el-table-column fixed prop="id" label="norad_id" width="100" :resizable="false">
+        <el-table-column fixed type="index" align="center" :resizable="false">
+        </el-table-column>
+        <el-table-column fixed prop="id" label="norad_id" width="90" :resizable="false">
         </el-table-column>
         <el-table-column fixed prop="name" label="卫星名称" :resizable="false">
         </el-table-column>

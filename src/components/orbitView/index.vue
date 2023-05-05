@@ -56,11 +56,25 @@ export default {
         geocoder: false,
         baseLayerPicker: false,
         infoBox: false,
-        fullscreenButton: false,
+        fullscreenButton: true,
         useDefaultRenderLoop: true,
+        // 调用高德地图api，使用默认的bingmaps会报错：get net::ERR_CONNECTION_RESET错误
+        imageryProvider: new Cesium.UrlTemplateImageryProvider({ 
+          url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",}),
       })
       // 隐藏logo
       this.viewer._cesiumWidget._creditContainer.style.display = "none"
+      if(Cesium.FeatureDetection.supportsImageRenderingPixelated()){//判断是否支持图像渲染像素化处理
+        this.viewer.resolutionScale = window.devicePixelRatio
+      }
+      
+      //是否开启抗锯齿
+      this.viewer.scene.fxaa = true
+      this.viewer.scene.postProcessStages.fxaa.enabled = true
+
+      // 全屏显示设置
+      this.viewer.fullscreenButton.viewModel.fullscreenElement = this.viewer.scene.canvas
+
     },
     // 向服务请请求获取默认卫星轨道数据
     getData() {

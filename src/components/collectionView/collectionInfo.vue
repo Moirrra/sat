@@ -9,15 +9,11 @@
         @selection-change="handleSelectionChange" :row-key="getRowKeys">
         <el-table-column type="selection" :reserve-selection="true" width="50" :resizable="false">
         </el-table-column>
-        <el-table-column fixed type="index" :resizable="false">
+        <el-table-column fixed type="index" align="center" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="id" label="Norad ID" width="100" :resizable="false">
+        <el-table-column fixed prop="id" label="Norad ID" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Satellite Name" width="180" :resizable="false">
-        </el-table-column>
-        <el-table-column fixed prop="tle1" label="TLE1" :resizable="false">
-        </el-table-column>
-        <el-table-column fixed prop="tle2" label="TLE2" :resizable="false">
+        <el-table-column fixed prop="name" label="Satellite Name" :resizable="false">
         </el-table-column>
       </el-table>
     </div>
@@ -117,6 +113,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.removeSelection()
+        this.getSatData()
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -137,7 +134,6 @@ export default {
       Promise.all(queue).then((results) => {
         console.log(results[0].message)
         if (results[0].status == 0) {
-          this.getSatData()
           this.$message({
             type: 'success',
             message: '删除所选卫星成功!'

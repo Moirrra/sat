@@ -1,23 +1,20 @@
 <template>
   <div id="satellite-wrap">
     <div class="search">
-      <el-input class="search-input" v-model="search" size="mini" placeholder="输入norad_id搜索" />
+      <el-input class="search-input" v-model="search" size="mini" placeholder="输入Norad ID搜索" />
       <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
     </div>
     <div class="satellite-table">
-      <el-table :data="showData" border stripe min-height="480" style="width: 95%" ref="satTable">
-        <el-table-column fixed type="index" :resizable="false">
+      <el-table :data="showData" border stripe style="width: 95%" ref="satTable">
+        <el-table-column fixed type="index" :index="tableIndex" align="center" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="id" label="Norad ID" width="100" :resizable="false">
+        <el-table-column fixed prop="id" label="Norad ID" width="150" :resizable="false">
         </el-table-column>
-        <el-table-column fixed prop="name" label="Satellite Name" width="180" :resizable="false">
-        </el-table-column>
-        <el-table-column fixed prop="tle1" label="TLE1" width="260" :resizable="false">
-        </el-table-column>
-        <el-table-column fixed prop="tle2" label="TLE2" width="260" :resizable="false">
+        <el-table-column fixed prop="name" label="Satellite Name" :resizable="false">
         </el-table-column>
         <el-table-column fixed label="操作" :resizable="false">
           <template slot-scope="scope">
+            <el-button class="btn" @click="handleLook(scope.row)" type="text" size="small">查看</el-button>
             <el-button class="btn" @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
             <el-button class="btn" @click="handleRemove(scope.row)" type="text" size="small">移除</el-button>
           </template>
@@ -42,7 +39,7 @@ export default {
     return {
       filterData: [], // 过滤搜索的表格数据
       currentPage: 1, // 当前页码
-      pageSize: 5,  // 每页数据条数
+      pageSize: 10,  // 每页数据条数
       search: '', // 搜索关键字
     }
   },
@@ -56,7 +53,6 @@ export default {
       } else {
         return this.satelliteList
       }
-
     },
     // 总数据条数
     total() {
@@ -65,7 +61,7 @@ export default {
       } else {
         return 0
       }
-    }
+    },
   },
   methods: {
     // 获取所有卫星列表
@@ -101,6 +97,10 @@ export default {
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage
     },
+    // 分页表格序号
+    tableIndex(index) {
+      return (this.currentPage - 1) * this.pageSize + index + 1
+    },
     // 点击移除卫星
     async handleRemove(row) {
       this.$confirm('此操作将永久删除该卫星, 是否继续?', '提示', {
@@ -116,6 +116,10 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+    // 点击查看卫星
+    handleLook(row) {
+      this.$router.push(`satellite_info/${row.id}`)
     },
     // 点击编辑卫星
     handleEdit(row) {
@@ -140,7 +144,7 @@ export default {
           message: '删除卫星失败！'
         })
       }
-    }
+    },
   },
   created() {
     this.getData()
@@ -164,7 +168,7 @@ export default {
 }
 
 .btn {
-  margin: 20px 10px;
+  margin: 0 10px;
 }
 
 .search {

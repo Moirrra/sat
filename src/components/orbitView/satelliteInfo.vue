@@ -90,7 +90,7 @@ export default {
 
 .info-label {
   display: inline-block;
-  width: 150px;
+  width: 80px;
   font-weight: 700;
 }
 </style>

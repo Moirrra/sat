@@ -6,7 +6,7 @@ import API from '@/api'
 
 import { Menu, Submenu, MenuItem, MenuItemGroup, Select, Option, 
   Button, Table, TableColumn, Pagination, Form, FormItem, Tag,
-  Input, MessageBox, Message } from 'element-ui'
+  Input, MessageBox, Message, Descriptions, DescriptionsItem } from 'element-ui'
 
 Vue.use(Menu)
 Vue.use(Submenu)
@@ -22,6 +22,8 @@ Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Tag)
 Vue.use(Input)
+Vue.use(Descriptions)
+Vue.use(DescriptionsItem)
 Vue.component(MessageBox.name, MessageBox)
 Vue.component(Message.name, Message)
 

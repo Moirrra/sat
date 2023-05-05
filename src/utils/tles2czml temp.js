@@ -3,7 +3,8 @@ const satellite = require('satellite.js')
 const julian = require('julian')
 
 
-module.exports = function tles2czml(start, end, tles, gap = 300) {
+module.exports = function tles2czml(start, end, tles) {
+  console.log('tles2czml')
   // 间隔的分钟数
   let minsInDuration = (end.getTime() - start.getTime()) / 60000
   // 设置开始时间
@@ -34,6 +35,7 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
     let sat_id = tles[index].id
     let sat_name = tles[index].name
     let pos = [] // 保存位置信息
+    console.log('sat_id:' + sat_id)
 
     // 初始化一条卫星记录
     let satrec = satellite.twoline2satrec(tles[index].tle1, tles[index].tle2)
@@ -43,11 +45,61 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
 
     // 运行一圈的分钟数
     let minsPerInterval = 1440 / totalIntervalsInDay
+    let intervalTime = moment(start.toISOString()).toISOString()
+    let leadIntervalArray = []
+    let trailIntervalArray = []
+
+    // 倒序 避免最后一圈轨迹不完整
+    for (let i = minsInDuration; i >= 0; i -= minsPerInterval) {
+      // 最开始
+      if (i <= minsPerInterval) {
+        let curOrbitalInterval = {
+          "interval": `${start.toISOString()}/${intervalTime}`,
+          "epoch": `${start.toISOString()}`,
+          "number": [ // 时刻 参数值
+            0, minsPerInterval * 60,
+            minsPerInterval * 60, 0
+          ]
+        }
+        let curTrail = {
+          "interval": `${startTime}/${intervalTime}`,
+          "epoch": `${startTime}`,
+          "number": [
+            0, 0,
+            minsPerInterval * 60, minsPerInterval * 60
+          ]
+        }
+        leadIntervalArray.push(curOrbitalInterval)
+        trailIntervalArray.push(curTrail)
+      }
+      else {
+        let prevIntervalTime = moment(intervalTime).add(-minsPerInterval, 'm').toISOString()
+        let curOrbitalInterval = {
+          "interval": `${prevIntervalTime}/${intervalTime}`,
+          "epoch": `${prevIntervalTime}`,
+          "number": [
+            0, minsPerInterval * 60,
+            minsPerInterval * 60, 0
+          ]
+        }
+        let curTrail = {
+          "interval": `${prevIntervalTime}/${intervalTime}`,
+          "epoch": `${prevIntervalTime}`,
+          "number": [
+            0, 0,
+            minsPerInterval * 60, minsPerInterval * 60 
+          ] // 卫星的轨道周期
+        }
+        intervalTime = moment(intervalTime).add(-minsPerInterval, 'm').toISOString()
+        leadIntervalArray.push(curOrbitalInterval)
+        trailIntervalArray.push(curTrail)
+      }
+    }
 
     // current time 和 epoch time 之间的秒数 原单位是毫秒
     let sec = (start - julian.toDate(satrec.jdsatepoch)) / 1000
-    // 每gap秒计算一个位置信息 获得一圈的位置
-    for (let i = sec; i <= sec + minsInDuration * gap; i += gap) {
+    // 每60秒计算一个位置信息 获得一圈的位置
+    for (let i = sec; i <= sec + minsInDuration * 60; i+=60) {
       // 计算当前卫星位置和速度
       let positionAndVelocity = satellite.sgp4(satrec, i * 0.0166667) // 0.0166667min = 1sec
       // 地惯坐标系
@@ -89,6 +141,13 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
         "verticalOrigin": "CENTER"
       },
       "path": { // 轨迹
+        // "show": [
+        //   {
+        //     "interval": `${startTime}/${endTime}`,
+        //     "boolean": true
+        //   }
+        // ],
+        // "width": 1,
         "material": {
           "solidColor": {
             "color": {
@@ -105,9 +164,9 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
         },
         "resolution": 120,
         // 动画绘制前方的轨迹时间 减少
-        "leadTime": 0,
+        // "leadTime": leadIntervalArray,
         // 动画绘制出的轨迹时间 增加
-        "trailTime": minsPerInterval*60
+        // "trailTime": trailIntervalArray
       },
       "model": {
         "show": true,
@@ -126,6 +185,7 @@ module.exports = function tles2czml(start, end, tles, gap = 300) {
       }
     }
     tempCZML.push(initialCZMLProps)
+    console.log('czml: done')
   }
   return tempCZML
 }
