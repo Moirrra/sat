@@ -8,10 +8,10 @@
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteInfo ref="satInfo"></SatelliteInfo>
+        <SatelliteDetail ref="satInfo"></SatelliteDetail>
       </div>
       <div class="sat-list-session">
-        <CollectionSelect></CollectionSelect>
+        <CollectionSelect @createOrbits="createOrbits" @getEntity="getEntity" ></CollectionSelect>
       </div>
     </div>
   </div>
@@ -19,70 +19,27 @@
 
 <script>
 import * as Cesium from 'cesium'
+import { mixins } from "@/mixin/cesiumOrbit"
 import CollectionSelect from './collectionSelect.vue'
-import SatelliteInfo from './satelliteInfo.vue'
+import SatelliteDetail from './satelliteDetail.vue'
 import tles2czml from '@/utils/tles2czml.js'
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNzBjYTE0YS04YjkxLTQ5MWYtYWVlNC1jZGU4MmFmNDk5NzIiLCJpZCI6MTI1NTExLCJpYXQiOjE2Nzk3MzgzOTF9.eRbziwrHaWTSTQwRUzoZ97d6fjHiKwUgK21YKO5dMsk'
 
 export default {
   name: "OrbitView",
-  components: { CollectionSelect, SatelliteInfo },
+  mixins: [mixins],
+  components: { CollectionSelect, SatelliteDetail },
   data() {
     return {
-      viewer: null,
-      showList: [], // 展示轨道的卫星id
-      satTleMap: null,
-      clickHandler: null,
-      timer: null,
       czmlPromise: null,
     };
   },
-  mounted() {
-    this.initViewer()
-    this.getData()
-    this.handleClickEntity()
-    this.$bus.$on('createOrbits', this.createOrbits)
-    this.$bus.$on('getEntity', this.getEntity)
-  },
-  beforeDestroy() {
-    this.$bus.$off('createOrbits')
-    this.$bus.$off('getEntity')
-  },
+  
   methods: {
-    // 初始化viewer
-    initViewer() {
-      this.viewer = new Cesium.Viewer('cesiumContainer', {
-        shouldAnimate: true,
-        geocoder: false,
-        baseLayerPicker: false,
-        infoBox: false,
-        fullscreenButton: true,
-        useDefaultRenderLoop: true,
-        // 调用高德地图api，使用默认的bingmaps会报错：get net::ERR_CONNECTION_RESET错误
-        imageryProvider: new Cesium.UrlTemplateImageryProvider({ 
-          url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",}),
-      })
-      // 隐藏logo
-      this.viewer._cesiumWidget._creditContainer.style.display = "none"
-      if(Cesium.FeatureDetection.supportsImageRenderingPixelated()){//判断是否支持图像渲染像素化处理
-        this.viewer.resolutionScale = window.devicePixelRatio
-      }
-      
-      //是否开启抗锯齿
-      this.viewer.scene.fxaa = true
-      this.viewer.scene.postProcessStages.fxaa.enabled = true
-
-      // 全屏显示设置
-      this.viewer.fullscreenButton.viewModel.fullscreenElement = this.viewer.scene.canvas
-
-    },
-    // 向服务请请求获取默认卫星轨道数据
-    getData() {
-      this.$store.dispatch('getAllSats')
-    },
     // 生成轨道数据
     createOrbits(list) {
       this.viewer.dataSources.removeAll(true)
+      this.clearSatDetail()
       let tleList = []
       for (let i = 0; i < list.length; i++) {
         tleList.push({
@@ -97,13 +54,25 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      // console.log(startTime, endTime)
-      // console.log(tleList)
       const czml = tles2czml(startTime, endTime, tleList)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
       // console.log(this.viewer.dataSources)
+    },
+    // 获取实体
+    getEntity(id) {
+      this.czmlPromise.then((czml) => {
+        console.log(czml.entities)
+        const entity = czml.entities.getById(id.toString())
+        this.$bus.$emit('getSatInfoById', entity.id)
+        // 选中实体
+        this.viewer._selectedEntity = entity
+        // 获取当前实体经纬度高度
+        this.getEntityInfo(entity)
+      }).catch((error) => {
+        console.log(error)
+      });
     },
     // 点击实体
     handleClickEntity() {
@@ -115,48 +84,21 @@ export default {
           console.log(pick.id.id) // entity.id
           _this.$bus.$emit('getSatInfoById', pick.id.id)
           // 获取当前实体经纬度高度
-          clearInterval(_this.timer)
           _this.getEntityInfo(pick.id)
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
     },
-    getEntity(id) {
-      // console.log('getEntity:', id)
-      this.czmlPromise.then((czml) => {
-        console.log(czml.entities)
-        const entity = czml.entities.getById(id.toString())
-        this.$bus.$emit('getSatInfoById', entity.id)
-        // 选中实体
-        this.viewer._selectedEntity = entity
-        // 获取当前实体经纬度高度
-        clearInterval(this.timer)
-        this.getEntityInfo(entity)
-      }).catch((error) => {
-        console.log(error)
-      });
-    },
     // 获取实体经纬度高度
     getEntityInfo(entity) {
-      // const _this = this
+      this.clearSatDetail()
       if (!entity) 
         return
+      // 立即执行
+      const lonLatHeight = this.computeLonLatHeight(entity)
+      this.$bus.$emit('updateInfo', lonLatHeight)
+      // 定时更新
       this.timer = setInterval(()=>{
-        let curTime = this.viewer.clock.currentTime
-        let timeStr = curTime.toString()
-        timeStr = timeStr.replace(/T/, ' ').replace(/Z/, '').replace(/\.\d+/g, '')
-        const position = entity.position.getValue(curTime)
-        const cartographic = Cesium.Cartographic.fromCartesian(position)
-        const lon = Cesium.Math.toDegrees(cartographic.longitude)
-        const lat = Cesium.Math.toDegrees(cartographic.latitude)
-        const height = cartographic.height
-        // const elevation = this.viewer.scene.globe.getHeight(cartographic)
-        const lonLatHeight = {
-          longitude: lon,
-          latitude: lat,
-          height: height,
-          // elevation: elevation,
-          time: timeStr,
-        }
+        const lonLatHeight = this.computeLonLatHeight(entity)
         this.$bus.$emit('updateInfo', lonLatHeight)
       }, 1000)
     },

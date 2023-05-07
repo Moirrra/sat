@@ -106,7 +106,7 @@ export default {
       for (let i = 0; i < this.selectedCollections.length; i++) {
         this.colorList.push(this.colorObj['val'+this.selectedCollections[i].id])
       }
-      this.$bus.$emit('createOrbitsNetwork', this.satelliteList, this.colorList)
+      this.$emit('createOrbitsNetwork', this.satelliteList, this.colorList)
     },
     // 处理多选变化事件
     handleSelectionChange(selectedList) {
@@ -120,7 +120,9 @@ export default {
   mounted() {
     this.getCollectionData()
   },
-
+  beforeDestroy() {
+    this.$off('createOrbitsNetwork')
+  }
 }
 </script>
 <style scoped>

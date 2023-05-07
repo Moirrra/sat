@@ -89,19 +89,21 @@ export default {
     },
     showOrbits() {
       if (this.satelliteList) {
-        this.$bus.$emit('createOrbits', this.satelliteList)
+        this.$emit('createOrbits', this.satelliteList)
       }
     },
     handleClick(row) {
       console.log('handleClick', row.id)
       // 获取实体信息
-      this.$bus.$emit('getEntity', row.id)
+      this.$emit('getEntity', row.id)
     }
   },
   mounted() {
     this.getCollectionData()
   },
-
+  beforeDestroy() {
+    this.$off('createOrbits')
+  }
 }
 </script>
 <style scoped>

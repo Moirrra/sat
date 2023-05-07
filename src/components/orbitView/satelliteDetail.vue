@@ -2,7 +2,10 @@
   <div id="sat-info">
     <div class="info-view">
       <div class="sat-info-header" v-if="JSON.stringify(satOnShow) !== '{}'">
-        {{ satOnShow.name }}
+        <span>{{ satOnShow.name }}</span>
+        <el-button type="text" icon="el-icon-search" circle size="mini"
+          @click="goSatInfo">
+        </el-button>
       </div>
       <div class="sat-info-header" v-else>
         当前卫星信息
@@ -29,35 +32,16 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mixins } from "@/mixin/satelliteDetail"
 export default {
-  name: 'SatelliteInfo',
+  name: 'SatelliteDetail',
+  mixins: [mixins],
   data() {
-    return {
-      longitude: '',
-      latitude: '',
-      height: '',
-    }
-  },
-  computed: {
-    ...mapState({
-      satOnShow: state => state.satOnShow,
-    }),
+    return {}
   },
   methods: {
-    // 获取卫星信息
-    getSatInfoById(id) {
-      this.$store.dispatch('getSatById', id)
-    },
-    // 更新卫星位置信息
-    updateInfo(obj) {
-      this.longitude = obj.longitude.toFixed(2) + '°'
-      this.latitude = obj.latitude.toFixed(2) + '°'
-      this.height = (obj.height / 1000).toFixed(2) + ' km'
-    }
   },
   mounted() {
-    this.$store.commit('INIT_SAT_ON_SHOW')
     this.$bus.$on('getSatInfoById', this.getSatInfoById)
     this.$bus.$on('updateInfo', this.updateInfo)
   },
@@ -71,13 +55,16 @@ export default {
 <style scoped>
 .sat-info-header {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding-left: 10px;
   height: 30px;
   background-color: #eee;
   border-bottom: 1px solid #dee2e6;
   font-size: 14px;
+}
+
+.header {
+  display: flex;
 }
 
 .sat-info-content {

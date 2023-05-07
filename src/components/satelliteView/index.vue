@@ -5,7 +5,10 @@
       <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
     </div>
     <div class="satellite-table">
-      <el-table :data="showData" border stripe style="width: 95%" ref="satTable">
+      <el-table :data="showData" border stripe style="width: 95%" ref="satTable"
+        @selection-change="handleSelectionChange" :row-key="getRowKeys">
+        <el-table-column type="selection" :reserve-selection="true" width="50" :resizable="false">
+        </el-table-column>
         <el-table-column fixed type="index" :index="tableIndex" align="center" :resizable="false">
         </el-table-column>
         <el-table-column fixed prop="id" label="Norad ID" width="150" :resizable="false">
@@ -17,6 +20,9 @@
             <el-button class="btn" @click="handleLook(scope.row)" type="text" size="small">查看</el-button>
             <el-button class="btn" @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
             <el-button class="btn" @click="handleRemove(scope.row)" type="text" size="small">移除</el-button>
+            <el-button class="btn" type="text" size="small">
+              <a @click="handleDownload(scope.row)">下载TLE</a>
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -26,9 +32,11 @@
         @current-change="handleCurrentChange">
       </el-pagination>
     </div>
-    <div class="btn-create" @click="handleCreate">
-      <el-button type="primary">创建Satellite</el-button>
+    <div class="btn-list">
+      <el-button type="primary" @click="handleCreate">创建Satellite</el-button>
+      <el-button @click="handleDownloadList">批量下载TLE</el-button>
     </div>
+    
   </div>
 </template>
 
@@ -41,6 +49,7 @@ export default {
       currentPage: 1, // 当前页码
       pageSize: 10,  // 每页数据条数
       search: '', // 搜索关键字
+      selection: [], // 所选卫星
     }
   },
   computed: {
@@ -77,6 +86,13 @@ export default {
           message: '获取卫星列表失败！'
         })
       }
+    },
+    // 处理多选变化事件
+    handleSelectionChange(selectedList) {
+      this.selection = selectedList
+    },
+    getRowKeys(row) {
+      return row.id
     },
     // 根据搜索过滤表格数据
     handleSearch() {
@@ -125,6 +141,54 @@ export default {
     handleEdit(row) {
       this.$router.push(`edit_satellite/${row.id}`)
     },
+    // 点击下载TLE
+    handleDownload(row) {
+      console.log('download ' + row.id)
+      this.$API.data.reqDownloadTLE(row.id).then(res => {
+        let blob = new Blob([res], { type: 'application/x-download' })
+        let link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.setAttribute('download', `tle_${row.id}.txt`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(link.href)
+        this.$message({
+          type: 'success',
+          message: '下载TLE文件成功!'
+        })
+      }).catch(err => {
+        console.log(err.message)
+        this.$message({
+          type: 'danger',
+          message: '下载TLE文件失败！'
+        })
+      })
+    },
+    // 点击批量下载TLE
+    handleDownloadList() {
+      let idList = this.selection.map(item => item.id)
+      this.$API.data.reqDownloadTLEList(idList).then(res => {
+        let blob = new Blob([res], { type: 'application/x-download' })
+        let link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.setAttribute('download', 'tle.txt')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(link.href)
+        this.$message({
+          type: 'success',
+          message: '下载TLE文件成功!'
+        })
+      }).catch(err => {
+        console.log(err.message)
+        this.$message({
+          type: 'danger',
+          message: '下载TLE文件失败！'
+        })
+      })
+    },
     // 点击创建卫星
     handleCreate() {
       this.$router.push('/add_satellite')
@@ -167,6 +231,10 @@ export default {
   margin: 20px 0;
 }
 
+.satellite-table a {
+  color: #409EFF;
+}
+
 .btn {
   margin: 0 10px;
 }
@@ -182,5 +250,10 @@ export default {
 
 .pagination {
   text-align: center;
+}
+
+.btn-list {
+  display: flex;
+  margin-top: 10px;
 }
 </style>

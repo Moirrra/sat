@@ -37,6 +37,10 @@
           <i class="el-icon-position"></i>
           <span slot="title">Satellites</span>
         </el-menu-item>
+        <el-menu-item index="/setting">
+          <i class="el-icon-setting"></i>
+          <span slot="title">设置</span>
+        </el-menu-item>
       </el-menu>
     </div>
   </div>

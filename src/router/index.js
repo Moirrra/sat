@@ -14,6 +14,7 @@ const satelliteInfo = () => import('@/components/satelliteView/satelliteInfo.vue
 const satelliteEdit = () => import('@/components/satelliteView/satelliteEdit.vue')
 const coverageView = () => import('@/components/coverageView/index.vue')
 const linkView = () => import('@/components/linkView/index.vue')
+const settingView = () => import('@/components/settingView/index.vue')
 
 const routes = [
   {
@@ -86,6 +87,11 @@ const routes = [
         path: 'link',
         name: '星间链路',
         component: linkView,
+      },
+      {
+        path: 'setting',
+        name: '设置',
+        component: settingView
       }
     ]
   },

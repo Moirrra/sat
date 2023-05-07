@@ -33,7 +33,7 @@ export default {
   .content-header h3 {
     padding-left: 50px;
     font-size: 18px;
-    font-weight: 700;
+    /* font-weight: 700; */
     color: #4d4e59;
   }
 
