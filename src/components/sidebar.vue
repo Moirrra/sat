@@ -18,8 +18,12 @@
           <span slot="title">卫星轨道</span>
         </el-menu-item>
         <el-menu-item index="/network">
-          <i class="el-icon-s-help"></i>
+          <i class="el-icon-aim"></i>
           <span slot="title">星座组网</span>
+        </el-menu-item>
+        <el-menu-item index="/pass">
+          <i class="el-icon-discover"></i>
+          <span slot="title">卫星过境</span>
         </el-menu-item>
         <el-menu-item index="/coverage">
           <i class="el-icon-menu"></i>

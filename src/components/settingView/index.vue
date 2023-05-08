@@ -7,34 +7,23 @@
             <div class="title">上传TLE文件</div>
           </template>
           <div class="content">
-            <div class="description">上传多个卫星TLE文件, 加载至Satellite数据库中</div>
-            <el-upload class="upload-demo" ref="upload_tle" action="" accept=".txt" :file-list="fileList"
-              :before-upload="beforeUpload" :auto-upload="false">
+            <div class="description">上传卫星TLE文件, 加载至Satellite数据库中</div>
+            <el-upload class="upload-demo" ref="upload_tle" accept=".txt" :file-list="fileList" :http-request="uploadTLE"
+              action="#" :auto-upload="false" multiple>
               <div class="btn-list">
-                <el-button slot="trigger" size="small">选择文件</el-button>
-                <el-button style="margin-left: 10px;" size="small" type="primary" @click="uploadTLE">上传</el-button>
+                <template>
+                  <el-button slot="trigger" size="small">选择文件</el-button>
+                </template>
+                <template>
+                  <el-button style="margin-left: 10px;" size="small" type="primary"
+                    @click.stop="handleUploadTLE">上传</el-button>
+                </template>
               </div>
-              <div slot="tip" class="el-upload__tip">支持文件格式: txt</div>
+              <div slot="tip" class="el-upload__tip">支持文件格式: txt, 大小不超过2M</div>
             </el-upload>
           </div>
         </el-collapse-item>
         <el-collapse-item name="2">
-          <template slot="title">
-            <div class="title">上传Collection配置文件</div>
-          </template>
-          <div class="content">
-            <div class="description">上传Collection配置文件, 加载至数据库中</div>
-            <el-upload class="upload-demo" ref="upload_col" action="" accept=".txt" :file-list="fileList"
-              :before-upload="beforeUpload" :auto-upload="false">
-              <div class="btn-list">
-                <el-button slot="trigger" size="small">选择文件</el-button>
-                <el-button style="margin-left: 10px;" size="small" type="primary" @click="uploadCOL">上传</el-button>
-              </div>
-              <div slot="tip" class="el-upload__tip">支持文件格式: txt</div>
-            </el-upload>
-          </div>
-        </el-collapse-item>
-        <el-collapse-item name="3">
           <template slot="title">
             <div class="title">更新TLE数据</div>
           </template>
@@ -44,12 +33,30 @@
             <el-button @click="updateSatInfo" :loading="updateSatInfoLoading">更新卫星信息</el-button>
           </div>
         </el-collapse-item>
-        <el-collapse-item name="4">
+        <el-collapse-item name="3">
           <template slot="title">
-            <div class="title">Title</div>
+            <div class="title">默认地面站设置</div>
           </template>
           <div class="content">
-            <div class="description">description</div>
+            <div class="description">
+              <div class="detail-form">
+                <el-form label-position="left" label-width="80px" :model="groundStation" clearable>
+                  <el-form-item label="纬度(°)">
+                    <el-input v-model="groundStation.latitude" oninput="value=value.replace(/[^0-9.]/g,'')"
+                      clearable></el-input>
+                  </el-form-item>
+                  <el-form-item label="经度(°)">
+                    <el-input v-model="groundStation.longitude" oninput="value=value.replace(/[^0-9.]/g,'')"
+                      clearable></el-input>
+                  </el-form-item>
+                  <el-form-item label="高度(km)">
+                    <el-input v-model="groundStation.height" oninput="value=value.replace(/[^0-9.]/g,'')"
+                      clearable></el-input>
+                  </el-form-item>
+                </el-form>
+              </div>
+              <el-button type="primary" @click="handleSave">保存</el-button>
+            </div>
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -64,26 +71,59 @@ export default {
     return {
       activeNames: [],
       fileList: [],
+      fileList1: [],
       updateSatLoading: false,
       updateSatInfoLoading: false,
+      groundStation: {
+        latitude: '',
+        longitude: '',
+        height: '',
+      }
     }
+  },
+  mounted() {
+    let gs = this.$store.state.groundStation
+    this.groundStation = gs
   },
   methods: {
     handleChange(val) {
       console.log(val);
     },
-    uploadTLE() {
+    // 点击上传TLE的回调
+    handleUploadTLE() {
       this.$refs.upload_tle.submit()
     },
-    uploadCOL() {
-      this.$refs.upload_col.submit()
-    },
-    beforeUpload(file) {
-      const isTXT = file.type === 'txt'
+    async uploadTLE(param) {
+      let file = param.file
+      // 文件类型&大小
+      const isTXT = file.name.split('.')[1] === 'txt'
+      const isLt2M = file.size / 1024 / 1024 < 2
       if (!isTXT) {
-        this.$message.error('上传文件只能是 txt 格式!');
+        this.$message.error('上传文件只能是 txt 格式!')
+        return false
       }
-      return isTXT
+      if (!isLt2M) {
+        this.$message.error('上传单个文件大小不能超过 10MB!')
+        return false
+      }
+      // 上传文件
+      let formData = new FormData()
+      formData.append('file', file)
+      let result = await this.$API.data.reqUploadTLE(formData)
+      if (result.status == 0) {
+        this.$message({
+          type: 'success',
+          message: '上传文件成功!'
+        })
+      } else {
+        this.$message({
+          type: 'danger',
+          message: '上传文件失败!'
+        })
+      }
+    },
+    handleUploadCOL() {
+      this.$refs.upload_col.submit()
     },
     // 点击更新数据库
     async updateSat() {
@@ -119,8 +159,15 @@ export default {
           message: '更新数据库satellite_info失败!'
         })
       }
-    }
-  }
+    },
+    // 点击保存地面站的回调
+    handleSave() {
+      this.groundStation.latitude = parseFloat(this.groundStation.latitude)
+      this.groundStation.longitude = parseFloat(this.groundStation.longitude)
+      this.groundStation.height = parseFloat(this.groundStation.height)
+      this.$store.commit('SET_DEFAULT_GROUND_STATION', this.groundStation)
+    },
+  },
 }
 </script>
 
@@ -158,4 +205,7 @@ export default {
 .description {
   margin-bottom: 10px;
 }
-</style>
+
+.detail-form {
+  width: 500px;
+}</style>

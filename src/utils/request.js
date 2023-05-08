@@ -24,7 +24,7 @@ requests.interceptors.response.use(
   },
   (error) => {
       // 响应失败
-      console.log('res.error')
+      console.log(error.message)
       return Promise.reject(new Error('failure'))
   }
 )

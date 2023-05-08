@@ -22,3 +22,10 @@ export const reqDownloadTLEList = (idList) => requests({
   },
   responseType: 'blob'
 })
+
+export const reqUploadTLE = (formData) => requests({
+  url: 'data/upload_tle',
+  method: 'post',
+  data: formData,
+  
+})

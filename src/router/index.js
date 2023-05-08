@@ -15,6 +15,7 @@ const satelliteEdit = () => import('@/components/satelliteView/satelliteEdit.vue
 const coverageView = () => import('@/components/coverageView/index.vue')
 const linkView = () => import('@/components/linkView/index.vue')
 const settingView = () => import('@/components/settingView/index.vue')
+const passView = () => import('@/components/passView/index.vue')
 
 const routes = [
   {
@@ -33,6 +34,12 @@ const routes = [
         path: 'network',
         name: '星座组网',
         component: networkView,
+      },
+      // passView
+      {
+        path: 'pass',
+        name: '卫星过境',
+        component: passView,
       },
       // collectionView
       {

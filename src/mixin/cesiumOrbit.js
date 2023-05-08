@@ -31,6 +31,8 @@ export const mixins = {
         imageryProvider: new Cesium.UrlTemplateImageryProvider({ 
           url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",}),
       })
+      // 相机高度
+      this.viewer.scene.screenSpaceCameraController.minimumZoomDistance = 1000000
       // 隐藏logo
       this.viewer._cesiumWidget._creditContainer.style.display = "none"
       if(Cesium.FeatureDetection.supportsImageRenderingPixelated()){//判断是否支持图像渲染像素化处理

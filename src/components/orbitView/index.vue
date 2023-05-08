@@ -54,7 +54,7 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      const czml = tles2czml(startTime, endTime, tleList)
+      const czml = tles2czml(startTime, endTime, tleList, 300, true)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
