@@ -19,7 +19,6 @@
             </el-form-item>
           </el-form>
         </div>
-        
       </div>
     </div>
   </div>
@@ -55,7 +54,7 @@ export default {
       this.groundStation.longitude = parseFloat(this.groundStation.longitude)
       this.groundStation.height = parseFloat(this.groundStation.height)
       this.$store.commit('SET_GROUND_STATION', this.groundStation)
-      this.$emit('refreshPasses', this.satOnShow.id)
+      this.$emit('updatePasses', this.satOnShow.id)
     },
   }
 }

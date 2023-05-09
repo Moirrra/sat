@@ -4,11 +4,10 @@
       <div class="cesium-view">
         <div id="cesiumContainer"></div>
       </div>
-      
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteDetail ref="satInfo"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition"></SatelliteDetail>
       </div>
       <div class="sat-list-session">
         <CollectionSelect @createOrbits="createOrbits" @getEntity="getEntity" ></CollectionSelect>
@@ -21,7 +20,7 @@
 import * as Cesium from 'cesium'
 import { mixins } from "@/mixin/cesiumOrbit"
 import CollectionSelect from './collectionSelect.vue'
-import SatelliteDetail from './satelliteDetail.vue'
+import SatelliteDetail from '@/components/satelliteDetail.vue'
 import tles2czml from '@/utils/tles2czml.js'
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNzBjYTE0YS04YjkxLTQ5MWYtYWVlNC1jZGU4MmFmNDk5NzIiLCJpZCI6MTI1NTExLCJpYXQiOjE2Nzk3MzgzOTF9.eRbziwrHaWTSTQwRUzoZ97d6fjHiKwUgK21YKO5dMsk'
 
@@ -31,10 +30,8 @@ export default {
   components: { CollectionSelect, SatelliteDetail },
   data() {
     return {
-      czmlPromise: null,
-    };
+    }
   },
-  
   methods: {
     // 生成轨道数据
     createOrbits(list) {
@@ -54,53 +51,10 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      const czml = tles2czml(startTime, endTime, tleList, 300, true)
+      const czml = tles2czml(startTime, endTime, tleList, 300, true, true)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
-      // console.log(this.viewer.dataSources)
-    },
-    // 获取实体
-    getEntity(id) {
-      this.czmlPromise.then((czml) => {
-        console.log(czml.entities)
-        const entity = czml.entities.getById(id.toString())
-        this.$bus.$emit('getSatInfoById', entity.id)
-        // 选中实体
-        this.viewer._selectedEntity = entity
-        // 获取当前实体经纬度高度
-        this.getEntityInfo(entity)
-      }).catch((error) => {
-        console.log(error)
-      });
-    },
-    // 点击实体
-    handleClickEntity() {
-      const _this = this
-      _this.clickHandler = new Cesium.ScreenSpaceEventHandler(_this.viewer.scene.canvas)
-      _this.clickHandler.setInputAction(function (event) {
-        let pick = _this.viewer.scene.pick(event.position)
-        if (Cesium.defined(pick)) {
-          console.log(pick.id.id) // entity.id
-          _this.$bus.$emit('getSatInfoById', pick.id.id)
-          // 获取当前实体经纬度高度
-          _this.getEntityInfo(pick.id)
-        }
-      }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-    },
-    // 获取实体经纬度高度
-    getEntityInfo(entity) {
-      this.clearSatDetail()
-      if (!entity) 
-        return
-      // 立即执行
-      const lonLatHeight = this.computeLonLatHeight(entity)
-      this.$bus.$emit('updateInfo', lonLatHeight)
-      // 定时更新
-      this.timer = setInterval(()=>{
-        const lonLatHeight = this.computeLonLatHeight(entity)
-        this.$bus.$emit('updateInfo', lonLatHeight)
-      }, 1000)
     },
   },
 }

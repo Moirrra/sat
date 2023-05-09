@@ -13,16 +13,16 @@
       <div class="sat-info-content">
         <div class="sat-info-table" v-if="JSON.stringify(satOnShow) !== '{}'">
           <div class="info">
-            <span class="info-label" v-if="latitude !== ''">纬度：</span>
-            <span>{{ latitude }}</span>
+            <span class="info-label">纬度：</span>
+            <span>{{ position.latitude }}</span>
           </div>
           <div class="info">
-            <span class="info-label" v-if="longitude !== ''">经度：</span>
-            <span>{{ longitude }}</span>
+            <span class="info-label">经度：</span>
+            <span>{{ position.longitude }}</span>
           </div>
           <div class="info">
-            <span class="info-label" v-if="height !== ''">海拔：</span>
-            <span>{{ height }}</span>
+            <span class="info-label">海拔：</span>
+            <span>{{ position.height }}</span>
           </div>
         </div>
         <h3 v-else>数据为空</h3>
@@ -36,19 +36,12 @@ import { mixins } from "@/mixin/satelliteDetail"
 export default {
   name: 'SatelliteDetail',
   mixins: [mixins],
+  props: ['position'],
   data() {
     return {}
   },
   methods: {
   },
-  mounted() {
-    this.$bus.$on('getSatInfoById_network', this.getSatInfoById)
-    this.$bus.$on('updateInfo_network', this.updateInfo)
-  },
-  beforeDestroy() {
-    this.$bus.$off('getSatInfoById_network')
-    this.$bus.$off('updateInfo_network')
-  }
 }
 </script>
 

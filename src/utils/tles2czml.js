@@ -3,7 +3,7 @@ const satellite = require('satellite.js')
 const julian = require('julian')
 
 
-module.exports = function tles2czml(start, end, tles, gap = 300, completed = false, fixedColor = false, colorStr = "") {
+module.exports = function tles2czml(start, end, tles, gap = 300, showPath = true, completed = false, fixedColor = false, colorStr = "") {
   // 间隔的分钟数
   let minsInDuration = (end.getTime() - start.getTime()) / 60000
   // 设置开始时间
@@ -99,6 +99,7 @@ module.exports = function tles2czml(start, end, tles, gap = 300, completed = fal
         "verticalOrigin": "CENTER"
       },
       "path": { // 轨迹
+        "show": showPath,
         "material": {
           "solidColor": {
             "color": {

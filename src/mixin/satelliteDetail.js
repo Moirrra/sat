@@ -14,18 +14,15 @@ export const mixins = {
   },
   mounted() {
     this.$store.commit('INIT_SAT_ON_SHOW')
+    this.$bus.$on('getSatInfoById', this.getSatInfoById)
+  },
+  beforeDestroy() {
+    this.$bus.$off('getSatInfoById')
   },
   methods: {
     // 获取卫星信息
     getSatInfoById(id) {
       this.$store.dispatch('getSatById', id)
-    },
-    // 更新卫星位置信息
-    updateInfo(obj) {
-      // console.log('updateInfo in satDetail')
-      this.longitude = obj.longitude.toFixed(2) + '°'
-      this.latitude = obj.latitude.toFixed(2) + '°'
-      this.height = (obj.height / 1000).toFixed(2) + ' km'
     },
     goSatInfo() {
       let url = this.$router.resolve(`satellite_info/${this.satOnShow.id}`)

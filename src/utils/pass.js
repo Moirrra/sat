@@ -26,10 +26,9 @@ export function computePasses(
   minElevation = 10,
   maxPasses = 50
 ) {
-  console.log('computePasses:', groundStationPosition)
 
   const satrec = satellite.twoline2satrec(tle.tle1, tle.tle2)
-  // console.log(satrec)
+
   const groundStation = { ...groundStationPosition }
   groundStation.latitude *= deg2rad
   groundStation.longitude *= deg2rad
@@ -41,11 +40,6 @@ export function computePasses(
   let ongoingPass = false
   let lastElevation = 0
 
-
-
-  console.log(new Date(date.toISOString()))
-  console.log(startDate)
-  console.log(endDate)
   while (date < endDate) {
     const positionEcf = positionECF(satrec, date)
     const lookAngles = satellite.ecfToLookAngles(groundStation, positionEcf)
@@ -103,14 +97,12 @@ export function computePasses(
 }
 
 export function processPasses(passes, time) {
-  console.log('processPasses')
+  // console.log('processPasses')
   let passList = []
   time = new Date(time.toString())
-  console.log('time ', time)
 
   // 时区差 单位：小时
   let offset = new Date().getTimezoneOffset() / 60
-  // console.log('offset ', offset)
 
   for (let i = 0; i < passes.length; i++) {
     let pass = passes[i]

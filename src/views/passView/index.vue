@@ -10,10 +10,13 @@
     </div>
     <div class="content-right">
       <div class="gs-info-session">
-        <GroundStationDetail @refreshPasses="updatePasses"></GroundStationDetail>
+        <GroundStationDetail @updatePasses="updatePasses"></GroundStationDetail>
       </div>
       <div class="sat-info-session">
-        <SatelliteDetail ref="satInfo" @refreshPasses="updatePasses"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition"></SatelliteDetail>
+      </div>
+      <div class="pass-info-session">
+        <PassDetail :passList="passList"></PassDetail>
       </div>
     </div>
   </div>
@@ -23,8 +26,10 @@
 import * as Cesium from 'cesium'
 import { mixins } from "@/mixin/cesiumOrbit"
 import CollectionSelect from './collectionSelect.vue'
-import SatelliteDetail from './satelliteDetail.vue'
+import SatelliteDetail from '@/components/satelliteDetail.vue'
+import PassDetail from './passDetail.vue'
 import GroundStationDetail from './groundStationDetail.vue'
+import _ from "lodash"
 import tles2czml from '@/utils/tles2czml.js'
 import { computePasses, processPasses } from '@/utils/pass.js'
 import { mapState } from 'vuex'
@@ -33,11 +38,13 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 export default {
   name: "PassView",
   mixins: [mixins],
-  components: { CollectionSelect, SatelliteDetail, GroundStationDetail },
+  components: { CollectionSelect, SatelliteDetail, PassDetail, GroundStationDetail },
   data() {
     return {
-      czmlPromise: null,
-    };
+      passList: [], // 过境信息
+      onTickCallbackPasses: null, // 侦听获取卫星位置的事件回调
+      tle: null, // 当前卫星轨道信息
+    }
   },
   computed: {
     ...mapState({
@@ -48,13 +55,22 @@ export default {
     this.$bus.$emit('clearPasses')
   },
   methods: {
+    // 清除Passes数据
+    clearPasses() {
+      this.passList = []
+      if (this.onTickCallbackPasses) {
+        this.viewer.clock.onTick.removeEventListener(this.onTickCallbackPasses)
+      }
+    },
     // 生成轨道数据
     createOrbits(list) {
       console.log('createOrbits')
       this.viewer.dataSources.removeAll(true)
       this.clearSatDetail()
-      this.$bus.$emit('clearPasses')
+      this.clearPasses()
+      // 创建地面站
       this.createGroundStation()
+
       let tleList = []
       for (let i = 0; i < list.length; i++) {
         tleList.push({
@@ -74,85 +90,73 @@ export default {
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
     },
-    // 获取实体
+    // 点击卫星实体的回调
+    handleClickEntity() {
+      const _this = this
+      this.clickHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas)
+      this.clickHandler.setInputAction((event) => {
+        let pick = _this.viewer.scene.pick(event.position)
+        if (Cesium.defined(pick)) {
+          console.log(pick.id.id) // entity.id
+          if (pick.id.id == 'groundStation') return
+          _this.$bus.$emit('getSatInfoById', pick.id.id)
+          // 获取当前实体经纬度高度
+          _this.getEntityInfo(pick.id)
+          // 获取过境信息
+          _this.getPassInfo(pick.id.id)
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    },
+    // 获取卫星实体
     getEntity(id) {
-      if (id == 'groundStation') return
       this.czmlPromise.then((czml) => {
         console.log(czml.entities)
         const entity = czml.entities.getById(id.toString())
-        this.$bus.$emit('getSatInfoById_pass', entity.id)
+        if (entity.id == 'groundStation') return
+        this.$bus.$emit('getSatInfoById', entity.id)
         // 选中实体
         this.viewer._selectedEntity = entity
         // 获取当前实体经纬度高度
         this.getEntityInfo(entity)
         // 获取过境信息
-        this.updatePasses(entity.id)
+        this.getPassInfo(entity.id)
       }).catch((error) => {
         console.log(error)
       });
     },
-    // 点击实体
-    handleClickEntity() {
-      const _this = this
-      _this.clickHandler = new Cesium.ScreenSpaceEventHandler(_this.viewer.scene.canvas)
-      _this.clickHandler.setInputAction(function (event) {
-        let pick = _this.viewer.scene.pick(event.position)
-        if (Cesium.defined(pick)) {
-          // console.log(pick.id.id) // entity.id
-          if (pick.id.id == 'groundStation') return
-          _this.$bus.$emit('getSatInfoById_pass', pick.id.id)
-          // 获取当前实体经纬度高度
-          _this.getEntityInfo(pick.id)
-          // 获取过境信息
-          _this.updatePasses(pick.id.id)
-        }
-      }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-    },
-    // 获取实体经纬度高度
-    getEntityInfo(entity) {
-      this.clearSatDetail()
-      this.$bus.$emit('clearPasses')
-      if (!entity)
-        return
-      // 立即执行
-      const lonLatHeight = this.computeLonLatHeight(entity)
-      this.$bus.$emit('updateInfo_pass', lonLatHeight)
-      // 定时更新
-      this.timer = setInterval(() => {
-        const lonLatHeight = this.computeLonLatHeight(entity)
-        this.$bus.$emit('updateInfo_pass', lonLatHeight)
-      }, 1000)
-    },
-    // 计算过境信息
-    async getPasses(time, id) {
-      console.log('getPasses:' + id + ' ' + time)
+    // 获取过境信息
+    async getPassInfo(id) {
+      this.clearPasses()
       let result = await this.$API.sat.reqSatById(id)
-      // console.log(result.status)
       if (result.status == 0) {
-        let tle = result.data
-        const passes = computePasses(tle, this.groundStation)
-        const passList = processPasses(passes, time)
-        console.log(passList)
-        return passList
+        this.tle = result.data
       } else {
         this.$message({
           type: 'danger',
-          message: '获取过境信息失败！'
+          message: '获取卫星信息失败！'
         })
-        return []
+        this.passList = []
+        this.tle = null
+      }
+      // 实时获取过境信息
+      if (this.tle) {
+        this.onTickCallbackPasses = this.viewer.clock.onTick.addEventListener((clock) => {
+          this.getPasses(clock)
+        })
       }
     },
-    async updatePasses(id) {
-      const time = this.viewer.clock.currentTime
-      console.log('updatePasses:', time)
-      const passList = await this.getPasses(time, id)
-      console.log(passList)
-      if (passList.length > 0) this.$bus.$emit('updatePasses', passList, time)
-      this.createGroundStation()
-    },
-    removeGroundStation() {
-      this.viewer.entities.removeById('groundStation')
-    },
+    // 计算过境信息
+    getPasses: _.throttle(function(clock) {
+      // console.log('getPasses')
+      const time = clock.currentTime
+      let startDate = new Date(clock.startTime.toString())
+      let endDate = new Date(clock.startTime.toString())
+      endDate = endDate.setDate(startDate.getDate() + 1)
+      endDate = new Date(endDate)
+      const passes = computePasses(this.tle, this.groundStation, startDate, endDate)
+      this.passList = processPasses(passes, time)
+    }, 1000),
+    // 创建地面站
     createGroundStation() {
       this.removeGroundStation()
       let lng = this.groundStation.longitude
@@ -168,7 +172,7 @@ export default {
         },
         label: {
           text: '地面站',
-          "font": "20pt Helvetica",//字体样式
+          font: "20pt Helvetica",//字体样式
           scale: 0.5,
           fillColor: Cesium.Color.WHITE,        //字体颜色
           showBackground: false,                //是否显示背景颜色
@@ -177,6 +181,15 @@ export default {
           pixelOffset: new Cesium.Cartesian2(10, 0)            //偏移
         }
       })
+    },
+    // 清除地面站
+    removeGroundStation() {
+      this.viewer.entities.removeById('groundStation')
+    },
+    updatePasses(id) {
+      this.removeGroundStation()
+      this.createGroundStation()
+      this.getPassInfo(id)
     },
   },
 }
@@ -253,7 +266,15 @@ export default {
 
 /* 卫星信息展示 */
 .sat-info-session {
-  height: 615px;
+  height: 136px;
+  border: 1px solid #dee2e6;
+  margin: 10px 5px;
+  background-color: #fff;
+}
+
+/* 过境信息展示 */
+.pass-info-session {
+  height: 457px;
   border: 1px solid #dee2e6;
   margin: 10px 5px;
   background-color: #fff;
