@@ -7,10 +7,13 @@
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteDetail :position="satPosition"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition">
+        </SatelliteDetail>
       </div>
       <div class="sat-list-session">
-        <CollectionMultiSelect @createOrbitsNetwork="createOrbitsNetwork"></CollectionMultiSelect>
+        <CollectionMultiSelect 
+          @createOrbitsNetwork="createOrbitsNetwork">
+        </CollectionMultiSelect>
       </div>
     </div>
   </div>

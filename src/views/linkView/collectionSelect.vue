@@ -7,7 +7,7 @@
         <el-option v-for="item in collectionList" :key="item.id" :value="item" :label="item.name">
         </el-option>
       </el-select>
-      <el-button class="btn-show" @click="showSats">展示卫星</el-button>
+      <el-button class="btn-show" @click="showOrbits">展示卫星</el-button>
     </div>
     <div class="select-table">
       <el-table :data="satelliteList" 

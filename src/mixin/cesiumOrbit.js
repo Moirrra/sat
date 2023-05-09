@@ -23,6 +23,7 @@ export const mixins = {
   },
   beforeDestroy() {
     this.clearSatDetail()
+    this.removeClickEntity()
   },
   methods: {
     // 初始化viewer
@@ -64,6 +65,11 @@ export const mixins = {
         this.viewer.clock.onTick.removeEventListener(this.onTickCallbackPosition)
       }
     },
+    removeClickEntity() {
+      if (this.clickHandler) {
+        this.clickHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+      }
+    },
     // 点击卫星实体的回调
     handleClickEntity() {
       const _this = this
@@ -72,7 +78,9 @@ export const mixins = {
         let pick = _this.viewer.scene.pick(event.position)
         if (Cesium.defined(pick)) {
           console.log(pick.id.id) // entity.id
-          _this.$bus.$emit('getSatInfoById', pick.id.id)
+          _this.$store.dispatch('getSatById', pick.id.id)
+          // _this.$refs.satDetail.getSatInfoById(pick.id.id)
+          // _this.$emit('getSatInfoById', pick.id.id)
           // 获取当前实体经纬度高度
           _this.getEntityInfo(pick.id)
         }
@@ -83,7 +91,9 @@ export const mixins = {
       this.czmlPromise.then((czml) => {
         console.log(czml.entities)
         const entity = czml.entities.getById(id.toString())
-        this.$bus.$emit('getSatInfoById', entity.id)
+        // this.$emit('getSatInfoById', entity.id)
+        // this.$refs.satDetail.getSatInfoById(entity.id)
+        this.$store.dispatch('getSatById', entity.id)
         // 选中实体
         this.viewer._selectedEntity = entity
         // 获取当前实体经纬度高度

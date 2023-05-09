@@ -14,16 +14,12 @@ export const mixins = {
   },
   mounted() {
     this.$store.commit('INIT_SAT_ON_SHOW')
-    this.$bus.$on('getSatInfoById', this.getSatInfoById)
-  },
-  beforeDestroy() {
-    this.$bus.$off('getSatInfoById')
   },
   methods: {
-    // 获取卫星信息
-    getSatInfoById(id) {
-      this.$store.dispatch('getSatById', id)
-    },
+    // // 获取卫星信息
+    // getSatInfoById(id) {
+    //   this.$store.dispatch('getSatById', id)
+    // },
     goSatInfo() {
       let url = this.$router.resolve(`satellite_info/${this.satOnShow.id}`)
       window.open(url.href)

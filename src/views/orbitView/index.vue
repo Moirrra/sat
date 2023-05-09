@@ -7,10 +7,14 @@
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteDetail :position="satPosition"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition">
+        </SatelliteDetail>
       </div>
       <div class="sat-list-session">
-        <CollectionSelect @createOrbits="createOrbits" @getEntity="getEntity" ></CollectionSelect>
+        <CollectionSelect
+          @createOrbits="createOrbits"
+          @getEntity="getEntity">
+        </CollectionSelect>
       </div>
     </div>
   </div>
@@ -56,7 +60,7 @@ export default {
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
     },
-  },
+  }
 }
 </script>
 

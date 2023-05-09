@@ -3,8 +3,7 @@
     <div class="info-view">
       <div class="sat-info-header" v-if="JSON.stringify(satOnShow) !== '{}'">
         <span>{{ satOnShow.name }}</span>
-        <el-button type="text" icon="el-icon-search" circle size="mini"
-          @click="goSatInfo">
+        <el-button type="text" icon="el-icon-search" circle size="mini" @click="goSatInfo">
         </el-button>
       </div>
       <div class="sat-info-header" v-else>

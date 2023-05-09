@@ -5,15 +5,21 @@
         <div id="cesiumContainer"></div>
       </div>
       <div class="sat-list-session">
-        <CollectionSelect @createOrbits="createOrbits" @getEntity="getEntity"></CollectionSelect>
+        <CollectionSelect 
+          @createOrbits="createOrbits" 
+          @getEntity="getEntity">
+        </CollectionSelect>
       </div>
     </div>
     <div class="content-right">
       <div class="gs-info-session">
-        <GroundStationDetail @updatePasses="updatePasses"></GroundStationDetail>
+        <GroundStationDetail 
+          @updatePasses="updatePasses">
+        </GroundStationDetail>
       </div>
       <div class="sat-info-session">
-        <SatelliteDetail :position="satPosition"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition">
+        </SatelliteDetail>
       </div>
       <div class="pass-info-session">
         <PassDetail :passList="passList"></PassDetail>
@@ -99,7 +105,9 @@ export default {
         if (Cesium.defined(pick)) {
           console.log(pick.id.id) // entity.id
           if (pick.id.id == 'groundStation') return
-          _this.$bus.$emit('getSatInfoById', pick.id.id)
+          // _this.$emit('getSatInfoById', pick.id.id)
+          // _this.$refs.satDetail.getSatInfoById(pick.id.id)
+          _this.$store.dispatch('getSatById', pick.id.id)
           // 获取当前实体经纬度高度
           _this.getEntityInfo(pick.id)
           // 获取过境信息
@@ -113,7 +121,9 @@ export default {
         console.log(czml.entities)
         const entity = czml.entities.getById(id.toString())
         if (entity.id == 'groundStation') return
-        this.$bus.$emit('getSatInfoById', entity.id)
+        // this.$emit('getSatInfoById', entity.id)
+        // this.$refs.satDetail.getSatInfoById(entity.id)
+        this.$store.dispatch('getSatById', entity.id)
         // 选中实体
         this.viewer._selectedEntity = entity
         // 获取当前实体经纬度高度

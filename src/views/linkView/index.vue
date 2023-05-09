@@ -5,12 +5,16 @@
         <div id="cesiumContainer"></div>
       </div>
       <div class="sat-list-session">
-        <CollectionSelect @createOrbits="createOrbits" @getEntity="getEntity"></CollectionSelect>
+        <CollectionSelect
+          @createOrbits="createOrbits"
+          @getEntity="getEntity">
+        </CollectionSelect>
       </div>
     </div>
     <div class="content-right">
       <div class="sat-info-session">
-        <SatelliteDetail :position="satPosition"></SatelliteDetail>
+        <SatelliteDetail :position="satPosition">
+        </SatelliteDetail>
       </div>
     </div>
   </div>
@@ -34,9 +38,8 @@ export default {
   },
 
   methods: {
-    // 生成卫星数据
+    // 生成轨道数据
     createOrbits(list) {
-      console.log('createOrbits')
       this.viewer.dataSources.removeAll(true)
       this.clearSatDetail()
       let tleList = []
@@ -53,25 +56,10 @@ export default {
       endTime = endTime.setDate(endTime.getDate() + 1)
       endTime = new Date(endTime)
 
-      const czml = tles2czml(startTime, endTime, tleList, 300, false)
+      const czml = tles2czml(startTime, endTime, tleList, 300, true, true)
       this.viewer.dataSources.add(
         this.czmlPromise = Cesium.CzmlDataSource.load(czml)
       )
-    },
-    // 点击实体
-    handleClickEntity() {
-      const _this = this
-      _this.clickHandler = new Cesium.ScreenSpaceEventHandler(_this.viewer.scene.canvas)
-      _this.clickHandler.setInputAction(function (event) {
-        let pick = _this.viewer.scene.pick(event.position)
-        if (Cesium.defined(pick)) {
-          _this.$bus.$emit('getSatInfoById', pick.id.id)
-          // _this.$bus.$emit('getSatInfoById_link', pick.id.id)
-          // 获取当前实体经纬度高度
-          _this.getEntityInfo(pick.id)
-          _this.createLink(965, 1002)
-        }
-      }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
     },
     // 创建连线
     createLink(from_id, to_id) {
@@ -186,18 +174,9 @@ export default {
   justify-content: stretch;
 }
 
-/* 地面站信息 */
-/*
-.gs-info-session {
-  height: 200px;
-  border: 1px solid #dee2e6;
-  margin: 10px 5px;
-  background-color: #fff;
-} */
-
 /* 卫星信息展示 */
 .sat-info-session {
-  height: 615px;
+  height: 136px;
   border: 1px solid #dee2e6;
   margin: 10px 5px;
   background-color: #fff;
