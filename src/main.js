@@ -7,7 +7,7 @@ import API from '@/api'
 import { Menu, Submenu, MenuItem, MenuItemGroup, Select, Option, 
   Button, Table, TableColumn, Pagination, Form, FormItem, Tag,
   Input, MessageBox, Message, Descriptions, DescriptionsItem, ColorPicker,
-  Collapse, CollapseItem, Upload } from 'element-ui'
+  Collapse, CollapseItem, Upload, Tabs, TabPane, Dialog } from 'element-ui'
 
 Vue.use(Menu)
 Vue.use(Submenu)
@@ -29,6 +29,9 @@ Vue.use(ColorPicker)
 Vue.use(Collapse)
 Vue.use(CollapseItem)
 Vue.use(Upload)
+Vue.use(Tabs)
+Vue.use(TabPane)
+Vue.use(Dialog)
 
 Vue.component(MessageBox.name, MessageBox)
 Vue.component(Message.name, Message)

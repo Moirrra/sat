@@ -66,7 +66,7 @@
 
 <script>
 export default {
-  name: 'SettingView',
+  name: 'Setting',
   data() {
     return {
       activeNames: [],
@@ -111,15 +111,9 @@ export default {
       formData.append('file', file)
       let result = await this.$API.data.reqUploadTLE(formData)
       if (result.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '上传文件成功!'
-        })
+        this.$message.success('上传文件成功!')
       } else {
-        this.$message({
-          type: 'danger',
-          message: '上传文件失败!'
-        })
+        this.$message.error('上传文件失败!')
       }
     },
     handleUploadCOL() {
@@ -132,15 +126,9 @@ export default {
       this.updateSatLoading = false
       console.log(result.message)
       if (result.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '更新数据库satellite成功!'
-        })
+        this.$message.success('更新数据库satellite成功!')
       } else {
-        this.$message({
-          type: 'danger',
-          message: '更新数据库satellite失败!'
-        })
+        this.$message.error('更新数据库satellite失败!')
       }
     },
     async updateSatInfo() {
@@ -149,15 +137,9 @@ export default {
       this.updateSatInfoLoading = false
       console.log(result.message)
       if (result.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '更新数据库satellite_info成功!'
-        })
+        this.$message.success('更新数据库satellite_info成功!')
       } else {
-        this.$message({
-          type: 'danger',
-          message: '更新数据库satellite_info失败!'
-        })
+        this.$message.error('更新数据库satellite_info失败!')
       }
     },
     // 点击保存地面站的回调
@@ -208,4 +190,5 @@ export default {
 
 .detail-form {
   width: 500px;
-}</style>
+}
+</style>

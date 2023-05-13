@@ -52,6 +52,7 @@
     <div class="btn-save" @click="handleCreate" v-else>
       <el-button type="primary">创建Collection</el-button>
     </div>
+    <div class="tip" v-show="$route.params.id">注意：编辑Collection会删除原有星间链路</div>
   </div>
 </template>
 
@@ -105,10 +106,7 @@ export default {
         this.collectionInfo.id = result.data.id
         this.collectionInfo.name = result.data.name
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取Collection数据失败！'
-        })
+        this.$message.error('获取Collection数据失败！')
       }
     },
     // 获取原有卫星列表
@@ -122,10 +120,7 @@ export default {
           this.satIdList.push(aList[i].satellite_id)
         }
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取Assignment列表失败！'
-        })
+        this.$message.error('获取Assignment列表失败！')
       }
     },
     // 获取所有卫星列表
@@ -136,10 +131,7 @@ export default {
         this.satelliteList = result.data
         this.filterData = this.satelliteList
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取卫星列表失败！'
-        })
+        this.$message.error('获取卫星列表失败！')
       }
     },
     getRowKeys(row) {
@@ -196,6 +188,15 @@ export default {
       } else {
         console.log(result.message)
       }
+      // 删除link
+      if (this.satIdList.length > 0) {
+        let result1 = await this.$API.link.reqDeleteLinkByCollection(this.collectionInfo.id)
+        if (result1.status == 0) {
+          console.log(result1.message)
+        } else {
+          console.log(result1.message)
+        }
+      }
       // 已有 删除原有assignment
       if (this.satIdList.length > 0) {
         let result1 = await this.$API.assignment.reqDeleteAssignmentByCollection(this.collectionInfo.id)
@@ -214,17 +215,11 @@ export default {
       Promise.all(queue).then((results) => {
         if (results[0].status == 0) {
           console.log(results[0].message)
-          this.$message({
-            type: 'success',
-            message: '保存Collection成功!'
-          })
+          this.$message.success('保存Collection成功!')
           this.goCollectionInfo()
         } else {
           console.log(results[0].message)
-          this.$message({
-            type: 'danger',
-            message: '保存Collection失败！'
-          })
+          this.$message.error('保存Collection失败！')
         }
       }).catch((err) => {
         console.log(err)
@@ -248,16 +243,10 @@ export default {
       Promise.all(queue).then((results) => {
         console.log(results[0].message)
         if (results[0].status == 0) {
-          this.$message({
-            type: 'success',
-            message: '创建Collection成功!'
-          })
+          this.$message.success('创建Collection成功!')
           this.goCollectionInfo()
         } else {
-          this.$message({
-            type: 'danger',
-            message: '创建Collection失败！'
-          })
+          this.$message.error('创建Collection失败！')
         }
       }).catch((err) => {
         console.log(err)

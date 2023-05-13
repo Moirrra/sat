@@ -2,17 +2,14 @@
   <div id="select-wrap">
     <div class="select-list-header">已选卫星列表</div>
     <div class="select-list">
-      <el-select class="select" v-model="collection" value-key="id"
-        filterable placeholder="请选择Collection">
+      <el-select class="select" v-model="collection" value-key="id" filterable placeholder="请选择Collection">
         <el-option v-for="item in collectionList" :key="item.id" :value="item" :label="item.name">
         </el-option>
       </el-select>
       <el-button class="btn-show" @click="showOrbits">展示轨道</el-button>
     </div>
     <div class="select-table">
-      <el-table :data="satelliteList" 
-        border max-height="310" style="width: 100%" 
-        @row-click="handleClick">
+      <el-table :data="satelliteList" border height="300" style="width: 100%" @row-click="handleClick">
         <el-table-column fixed type="index" align="center" :resizable="false">
         </el-table-column>
         <el-table-column fixed prop="id" label="norad_id" width="90" :resizable="false">

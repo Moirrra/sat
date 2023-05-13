@@ -12,7 +12,7 @@
         <el-table-column fixed label="轨道颜色" width="80" :resizable="false">
           <template slot-scope="scope">
             <el-color-picker v-model="colorObj['val' + scope.row.id]" 
-            show-alpha size="mini">
+              color-format="rgb" size="mini">
             </el-color-picker>
           </template>
         </el-table-column>
@@ -68,10 +68,7 @@ export default {
         if (result.status == 0) {
           this.assignmentList.push(result.data)
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取Assignment列表失败！'
-          })
+          this.$message.error('获取Assignment列表失败！')
         }
       }
       await this.getSatData()
@@ -93,10 +90,7 @@ export default {
         if (result.status == 0) {
           this.satelliteList.push(result.data)
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取卫星列表失败！'
-          })
+          this.$message.error('获取卫星列表失败！')
         }
       }
     },

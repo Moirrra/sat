@@ -11,7 +11,7 @@
     </div>
     <div class="select-table">
       <el-table :data="satelliteList" 
-        border max-height="310" style="width: 100%" 
+        border height="150" style="width: 100%" 
         @row-click="handleClick">
         <el-table-column fixed type="index" align="center" :resizable="false">
         </el-table-column>

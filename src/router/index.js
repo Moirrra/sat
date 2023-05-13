@@ -4,40 +4,40 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 const Home = () => import('@/components/home.vue')
-const orbitView = () => import('@/views/orbitView/index.vue')
-const networkView = () => import('@/views/networkView/index.vue')
-const collectionView = () => import('@/views/collectionView/index.vue')
-const collectionInfo = () => import('@/views/collectionView/collectionInfo.vue')
-const collectionEdit = () => import('@/views/collectionView/collectionEdit.vue')
-const satelliteView = () => import('@/views/satelliteView/index.vue')
-const satelliteInfo = () => import('@/views/satelliteView/satelliteInfo.vue')
-const satelliteEdit = () => import('@/views/satelliteView/satelliteEdit.vue')
-const coverageView = () => import('@/views/coverageView/index.vue')
-const linkView = () => import('@/views/linkView/index.vue')
-const settingView = () => import('@/views/settingView/index.vue')
+const OrbitView = () => import('@/views/orbitView/index.vue')
+const NetworkView = () => import('@/views/networkView/index.vue')
 const passView = () => import('@/views/passView/index.vue')
+const LinkView = () => import('@/views/linkView/index.vue')
+const Collection = () => import('@/views/collection/index.vue')
+const CollectionInfo = () => import('@/views/collection/collectionInfo.vue')
+const CollectionEdit = () => import('@/views/collection/collectionEdit.vue')
+const Satellite = () => import('@/views/satellite/index.vue')
+const SatelliteInfo = () => import('@/views/satellite/satelliteInfo.vue')
+const SatelliteEdit = () => import('@/views/satellite/satelliteEdit.vue')
+const Setting = () => import('@/views/setting/index.vue')
+
 
 const routes = [
   {
     path: '/',
     component: Home,
-    redirect:'/orbit',
+    redirect:'/orbit-view',
     children: [
       // orbitView
       {
-        path: 'orbit',
+        path: 'orbit-view',
         name: '卫星轨道',
-        component: orbitView,
+        component: OrbitView,
       },
       // networkView
       {
-        path: 'network',
+        path: 'network-view',
         name: '星座组网',
-        component: networkView,
+        component: NetworkView,
       },
       // passView
       {
-        path: 'pass',
+        path: 'pass-view',
         name: '卫星过境',
         component: passView,
       },
@@ -45,60 +45,52 @@ const routes = [
       {
         path: 'collection',
         name: 'Collections',
-        component: collectionView,
+        component: Collection,
       },
       {
-        path: 'collection_info/:id',
+        path: 'collection-info/:id',
         name: 'Collection详情',
-        component: collectionInfo,
+        component: CollectionInfo,
       },
       {
-        path: 'edit_collection/:id',
+        path: 'edit-collection/:id',
         name: '编辑Collection',
-        component: collectionEdit,
+        component: CollectionEdit,
       },
       {
-        path: 'create_collection',
+        path: 'create-collection',
         name: '创建Collection',
-        component: collectionEdit,
+        component: CollectionEdit,
       },
-      // satelliteView
       {
         path: 'satellite',
         name: 'Satellites',
-        component: satelliteView,
+        component: Satellite,
       },
       {
-        path: 'satellite_info/:id',
+        path: 'satellite-info/:id',
         name: '卫星详情',
-        component: satelliteInfo,
+        component: SatelliteInfo,
       },
       {
-        path: 'add_satellite',
+        path: 'add-satellite',
         name: '添加卫星',
-        component: satelliteEdit,
+        component: SatelliteEdit,
       },
       {
-        path: 'edit_satellite/:id',
+        path: 'edit-satellite/:id',
         name: '编辑卫星',
-        component: satelliteEdit,
+        component: SatelliteEdit,
       },
-      // coverageView
       {
-        path: 'coverage',
-        name: '卫星覆盖区域',
-        component: coverageView,
-      },
-      // linkView
-      {
-        path: 'link',
+        path: 'link-view',
         name: '星间链路',
-        component: linkView,
+        component: LinkView,
       },
       {
         path: 'setting',
         name: '设置',
-        component: settingView
+        component: Setting
       }
     ]
   },

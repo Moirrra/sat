@@ -76,10 +76,7 @@ export default {
           this.satInfo.tle1 = result.data.tle1
           this.satInfo.tle2 = result.data.tle2
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取卫星数据失败！'
-          })
+          this.$message.error('获取卫星数据失败！')
         }
 
         let result1 = await this.$API.satinfo.reqSatInfoById(this.$route.params.id)
@@ -88,10 +85,7 @@ export default {
           this.satInfo.status = result1.data.status
           this.satInfo.countries = result1.data.countries
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取卫星信息数据失败！'
-          })
+          this.$message.error('获取卫星信息数据失败！')
         }
       }
     },
@@ -111,16 +105,10 @@ export default {
       })
       console.log(result1.message)
       if (result.status == 0 && result1.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '创建Satellite成功!'
-        })
+        this.$message.success('创建Satellite成功!')
         this.goSatelliteInfo()
       } else {
-        this.$message({
-          type: 'danger',
-          message: '创建Satellite失败！'
-        })
+        this.$message.error('创建Satellite失败！')
       }
     },
     // 点击保存卫星
@@ -142,16 +130,10 @@ export default {
       })
       console.log(result1.message)
       if (result.status == 0 && result1.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '保存Satellite成功!'
-        })
+        this.$message.success('保存Satellite成功!')
         this.goSatellite()
       } else {
-        this.$message({
-          type: 'danger',
-          message: '保存Satellite失败！'
-        })
+        this.$message.error('保存Satellite失败！')
       }
     },
   },

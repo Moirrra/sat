@@ -21,7 +21,7 @@ export const mixins = {
     //   this.$store.dispatch('getSatById', id)
     // },
     goSatInfo() {
-      let url = this.$router.resolve(`satellite_info/${this.satOnShow.id}`)
+      let url = this.$router.resolve(`satellite-info/${this.satOnShow.id}`)
       window.open(url.href)
     }
   },

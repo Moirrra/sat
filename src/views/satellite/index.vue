@@ -42,7 +42,7 @@
 
 <script>
 export default {
-  name: 'SatelliteView',
+  name: 'Satellite',
   data() {
     return {
       filterData: [], // 过滤搜索的表格数据
@@ -81,10 +81,7 @@ export default {
         this.satelliteList = result.data
         this.filterData = this.satelliteList
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取卫星列表失败！'
-        })
+        this.$message.error('获取卫星列表失败！')
       }
     },
     // 处理多选变化事件
@@ -127,19 +124,16 @@ export default {
         await this.deleteSat(row.id)
         this.getData()
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+        this.$message.info('已取消删除')
       })
     },
     // 点击查看卫星
     handleLook(row) {
-      this.$router.push(`satellite_info/${row.id}`)
+      this.$router.push(`satellite-info/${row.id}`)
     },
     // 点击编辑卫星
     handleEdit(row) {
-      this.$router.push(`edit_satellite/${row.id}`)
+      this.$router.push(`edit-satellite/${row.id}`)
     },
     // 点击下载TLE
     handleDownload(row) {
@@ -153,16 +147,10 @@ export default {
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(link.href)
-        this.$message({
-          type: 'success',
-          message: '下载TLE文件成功!'
-        })
+        this.$message.success('下载TLE文件成功!')
       }).catch(err => {
         console.log(err.message)
-        this.$message({
-          type: 'danger',
-          message: '下载TLE文件失败！'
-        })
+        this.$message.error('下载TLE文件失败！')
       })
     },
     // 点击批量下载TLE
@@ -177,36 +165,28 @@ export default {
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(link.href)
-        this.$message({
-          type: 'success',
-          message: '下载TLE文件成功!'
-        })
+        this.$message.success('下载TLE文件成功!')
       }).catch(err => {
         console.log(err.message)
-        this.$message({
-          type: 'danger',
-          message: '下载TLE文件失败！'
-        })
+        this.$message.error('下载TLE文件失败！')
       })
     },
     // 点击创建卫星
     handleCreate() {
-      this.$router.push('/add_satellite')
+      this.$router.push('/add-satellite')
     },
     // 删除卫星
     async deleteSat(id) {
       let result = await this.$API.sat.reqDeleteSat(id)
+      let result1 = await this.$API.assignment.reqDeleteAssignmentBySatellite(id)
+      let result2 = await this.$API.link.reqDeleteLinkBySatellite(id)
       console.log(result.message)
-      if (result.status == 0) {
-        this.$message({
-          type: 'success',
-          message: '删除卫星成功!'
-        })
+      console.log(result1.message)
+      console.log(result2.message)
+      if (result.status == 0 && result1.status == 0 && result2.status == 0) {
+        this.$message.success('删除卫星成功!')
       } else {
-        this.$message({
-          type: 'danger',
-          message: '删除卫星失败！'
-        })
+        this.$message.error('删除卫星失败！')
       }
     },
   },

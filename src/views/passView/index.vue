@@ -141,10 +141,7 @@ export default {
       if (result.status == 0) {
         this.tle = result.data
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取卫星信息失败！'
-        })
+        this.$message.error('获取卫星信息失败！')
         this.passList = []
         this.tle = null
       }

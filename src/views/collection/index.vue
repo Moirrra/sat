@@ -32,14 +32,14 @@
 
 <script>
 export default {
-  name: 'CollectionView',
+  name: 'Collection',
   data() {
     return {
       collectionList: [],
       filterData: [], // 过滤搜索的表格数据
       currentPage: 1, // 当前页码
       pageSize: 5,  // 每页数据条数
-      search: '', // 搜索关键字
+      search: '', // 搜索关键
     }
   },
   computed: {
@@ -70,10 +70,7 @@ export default {
         this.collectionList = result.data
         this.filterData = this.collectionList
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取Collection列表失败！'
-        })
+        this.$message.error('获取Collection列表失败！')
       }
     },
     // 根据搜索过滤表格数据
@@ -118,39 +115,37 @@ export default {
         await this.deleteCollection(row.id)
         this.getData()
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+        this.$message.info('已取消删除')
       })
     },
     // 点击创建Collection
     handleCreate() {
-      this.$router.push('/create_collection')
+      this.$router.push('/create-collection')
     },
     // 删除Collection
     async deleteCollection(id) {
       // 删除对应assignment
       let result = await this.$API.assignment.reqDeleteAssignmentByCollection(id)
-        if (result.status == 0) {
-          console.log(result.message)
-        } else {
-          console.log(result.message)
-        }
-        // 删除该collection
-        result = await this.$API.collection.reqDeleteCollection(id)
+      if (result.status == 0) {
         console.log(result.message)
-        if (result.status == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除Collection成功!'
-          })
-        } else {
-          this.$message({
-            type: 'danger',
-            message: '删除Collection失败！'
-          })
-        }
+      } else {
+        console.log(result.message)
+      }
+      // 删除对应link
+      result = await this.$API.link.reqDeleteLinkByCollection(id)
+      if (result.status == 0) {
+        console.log(result.message)
+      } else {
+        console.log(result.message)
+      }
+      // 删除该collection
+      result = await this.$API.collection.reqDeleteCollection(id)
+      console.log(result.message)
+      if (result.status == 0) {
+        this.$message.success('删除Collection成功!')
+      } else {
+        this.$message.error('删除Collection失败！')
+      }
     }
   },
   mounted() {

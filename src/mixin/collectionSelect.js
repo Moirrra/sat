@@ -39,10 +39,7 @@ export const mixins = {
         this.assignmentList = result.data
         await this.getSatData()
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取Assignment列表失败！'
-        })
+        this.$message.error('获取Assignment列表失败！')
       }
     },
     // 获取卫星列表
@@ -56,15 +53,12 @@ export const mixins = {
       if (result.status == 0) {
         this.satelliteList = result.data
       } else {
-        this.$message({
-          type: 'danger',
-          message: '获取卫星列表失败！'
-        })
+        this.$message.error('获取卫星列表失败！')
       }
     },
     showOrbits() {
       if (this.satelliteList) {
-        this.$emit('createOrbits', this.satelliteList)
+        this.$emit('createOrbits', this.satelliteList, this.collection.id)
       }
     },
     handleClick(row) {

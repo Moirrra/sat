@@ -46,10 +46,7 @@ export default {
           this.satInfo.tle1 = result.data.tle1
           this.satInfo.tle2 = result.data.tle2
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取卫星数据失败！'
-          })
+          this.$message.error('获取卫星数据失败！')
         }
         
         let result1 = await this.$API.satinfo.reqSatInfoById(this.$route.params.id)
@@ -58,10 +55,7 @@ export default {
           this.satInfo.status = result1.data.status
           this.satInfo.countries = result1.data.countries
         } else {
-          this.$message({
-            type: 'danger',
-            message: '获取卫星信息数据失败！'
-          })
+          this.$message.error('获取卫星信息数据失败！')
         }
       }
     },

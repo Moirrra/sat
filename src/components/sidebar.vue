@@ -13,23 +13,19 @@
         @open="handleOpen" @close="handleClose"
         :collapse="isCollapse" background-color="#343a40" 
         :defaultActive="$route.path" text-color="#fff" active-text-color="#409EFF">
-        <el-menu-item index="/orbit">
+        <el-menu-item index="/orbit-view">
           <i class="el-icon-s-help"></i>
           <span slot="title">卫星轨道</span>
         </el-menu-item>
-        <el-menu-item index="/network">
+        <el-menu-item index="/network-view">
           <i class="el-icon-aim"></i>
           <span slot="title">星座组网</span>
         </el-menu-item>
-        <el-menu-item index="/pass">
+        <el-menu-item index="/pass-view">
           <i class="el-icon-discover"></i>
           <span slot="title">卫星过境</span>
         </el-menu-item>
-        <el-menu-item index="/coverage">
-          <i class="el-icon-menu"></i>
-          <span slot="title">卫星覆盖区域</span>
-        </el-menu-item>
-        <el-menu-item index="/link">
+        <el-menu-item index="/link-view">
           <i class="el-icon-share"></i>
           <span slot="title">星间链路</span>
         </el-menu-item>
